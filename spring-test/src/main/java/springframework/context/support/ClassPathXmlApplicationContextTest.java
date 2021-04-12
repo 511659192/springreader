@@ -15,9 +15,8 @@ import org.springframework.ui.Model;
  * @version 1.0
  * @created 2021/3/24 4:37 下午
  **/
+@Slf4j
 public class ClassPathXmlApplicationContextTest {
-
-    Logger log = LoggerFactory.getLogger(getClass());
 
     @Test
     public void testMain() {
@@ -25,6 +24,6 @@ public class ClassPathXmlApplicationContextTest {
         int beanDefinitionCount = context.getBeanDefinitionCount();
         log.info("cnt: {}", beanDefinitionCount);
         DemoService bean = context.getBean(DemoService.class);
-        System.out.println(bean.hello());
+        log.info(bean.hello());
     }
 }

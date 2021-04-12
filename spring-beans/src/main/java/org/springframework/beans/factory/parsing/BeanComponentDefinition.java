@@ -10,7 +10,9 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanReference;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * @author yangmeng
@@ -46,6 +48,13 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
         this.innerBeanDefinitions = innerBeans.toArray(new BeanDefinition[0]);
         this.beanReferences = references.toArray(new BeanReference[0]);
 
-        log.info("beanName:{}", this.getBeanName());
+        log.info("after init :{}", this);
+    }
+
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", BeanComponentDefinition.class.getSimpleName() + "[", "]").add("innerBeanDefinitions=" + Arrays.toString(innerBeanDefinitions))
+                .add("beanReferences=" + Arrays.toString(beanReferences)).toString();
     }
 }

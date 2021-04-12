@@ -9,6 +9,8 @@ import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 
+import java.util.StringJoiner;
+
 /**
  * @author yangmeng
  * @version 1.0
@@ -25,5 +27,10 @@ public class ScannedGenericBeanDefinition extends GenericBeanDefinition implemen
         setBeanClassName(this.metadata.getClassName());
         setResource(metadataReader.getResource());
         log.info("className:{}", this.metadata.getClassName());
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ScannedGenericBeanDefinition.class.getSimpleName() + "[", "]").add("metadata=" + metadata).toString();
     }
 }

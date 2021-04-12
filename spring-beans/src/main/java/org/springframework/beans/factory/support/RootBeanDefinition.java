@@ -8,6 +8,7 @@ import org.springframework.core.ResolvableType;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Executable;
+import java.util.StringJoiner;
 
 /**
  * @author yangmeng
@@ -45,5 +46,12 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
         ResolvableType targetType = this.targetType;
         return ResolvableType.resolve(targetType);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", RootBeanDefinition.class.getSimpleName() + "[", "]").add("beforeInstantiationResolved=" + beforeInstantiationResolved)
+                .add("resolvedTargetType=" + resolvedTargetType).add("targetType=" + targetType).add("constructorArgumentLock=" + constructorArgumentLock)
+                .add("postProcessingLock=" + postProcessingLock).add("resolvedConstructorOrFactoryMethod=" + resolvedConstructorOrFactoryMethod).add("postProcessed=" + postProcessed).toString();
     }
 }
