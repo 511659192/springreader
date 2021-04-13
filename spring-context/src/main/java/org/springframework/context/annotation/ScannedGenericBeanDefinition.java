@@ -23,7 +23,7 @@ public class ScannedGenericBeanDefinition extends GenericBeanDefinition implemen
     private final AnnotationMetadata metadata;
 
     public ScannedGenericBeanDefinition(MetadataReader metadataReader) {
-        this.metadata = metadataReader.getAnnotationMetadata();;
+        this.metadata = metadataReader.getAnnotationMetadata();
         setBeanClassName(this.metadata.getClassName());
         setResource(metadataReader.getResource());
         log.info("className:{}", this.metadata.getClassName());

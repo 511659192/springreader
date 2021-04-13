@@ -5,9 +5,13 @@ package org.springframework.beans.factory.support;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.Aware;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 import javax.annotation.Nullable;
@@ -31,6 +35,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     private volatile List<String> beanDefinitionNames = new ArrayList<>(256);
     private Comparator<Object> dependencyComparator;
     private AutowireCandidateResolver autowireCandidateResolver;
+    private final Map<Class<?>, Object> resolvableDependencies = new ConcurrentHashMap<>(16);
 
 
     public DefaultListableBeanFactory(BeanFactory parent) {
@@ -79,24 +84,72 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     }
 
     private <T> String getBeanNameForType(Class<T> classType) {
-        return doGetBeanNameForType(classType)[0];
+        return getBeanNamesForType(classType, true, false)[0];
     }
 
-    private <T> String[] doGetBeanNameForType(Class<T> classType) {
-        String[] candidateBeanNames = this.beanDefinitionNames.stream().filter(beanName -> {
-            BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
-            if (beanDefinition == null) {
-                return false;
+    @Override
+    public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletions, boolean allowEagerInit) {
+        return doGetBeanNameForType(type, includeNonSingletions, allowEagerInit);
+    }
+
+    private <T> String[] doGetBeanNameForType(Class<T> targetType, boolean includeNonSingletions, boolean allowEagerInit) {
+        List<String> beanDefinitionNames = this.beanDefinitionNames;
+        return beanDefinitionNames.stream().filter(beanName -> {
+            RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+            boolean isFactoryBean = isFactoryBean(beanName, mbd);
+            boolean matchFound = false;
+            if (!isFactoryBean) {
+                matchFound = isTypeMatch(beanName, targetType, allowEagerInit);
             }
-            boolean match = beanDefinition.getBeanClassName().equals(classType.getName());
-            return match;
+            return matchFound;
         }).toArray(String[]::new);
-        return candidateBeanNames;
-
     }
 
-    private <T> boolean isTypeMatch(String beanName, Class<T> classType, boolean allowFactoryBeanInit) {
+    protected Class<?> predictBeanType(RootBeanDefinition mbd) {
+        Class<?> targetType = mbd.getTargetType();
+        if (targetType != null) {
+            return targetType;
+        }
+        Class<?> resolveBeanClass = resolveBeanClass(mbd);
+        return resolveBeanClass;
+    }
+
+    private boolean isFactoryBean(String beanName, RootBeanDefinition mbd) {
+        Boolean isFactoryBean = mbd.isFactoryBean;
+        if (isFactoryBean != null) {
+            return isFactoryBean;
+        }
+        Class<?> resolveBeanClass = predictBeanType( mbd);
+        boolean resultl = resolveBeanClass != null && FactoryBean.class.isAssignableFrom(resolveBeanClass);
+        mbd.isFactoryBean = resultl;
+        return resultl;
+    }
+
+    private <T> boolean isTypeMatch(String beanName, Class<T> typeToMatch, boolean allowFactoryBeanInit) {
         Object singleton = getSingleton(beanName);
-        return classType.isInstance(singleton);
+        if (singleton != null) {
+            return typeToMatch.isInstance(singleton);
+        }
+
+
+        RootBeanDefinition rootBeanDefinition = getMergedLocalBeanDefinition(beanName);
+        Class<?> beanClass = rootBeanDefinition.getBeanClass();
+        return typeToMatch.isAssignableFrom(beanClass);
+    }
+
+    @Override
+    public void registerResolvableDependency(Class<?> dependencyType, @Nullable Object autowiredValue) {
+        if (autowiredValue != null) {
+            if (!(autowiredValue instanceof ObjectFactory || dependencyType.isInstance(autowiredValue))) {
+                throw new IllegalArgumentException(
+                        "Value [" + autowiredValue + "] does not implement specified dependency type [" + dependencyType.getName() + "]");
+            }
+            this.resolvableDependencies.put(dependencyType, autowiredValue);
+        }
+    }
+
+    @Override
+    public void registerSingleton(String beanName, Object singletonObject) {
+        super.registerSingleton(beanName, singletonObject);
     }
 }

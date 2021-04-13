@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
  * @version 1.0
  * @created 2021/3/25 7:55 下午
  **/
+@Slf4j
 public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 
     private final PropertySources propertySources;

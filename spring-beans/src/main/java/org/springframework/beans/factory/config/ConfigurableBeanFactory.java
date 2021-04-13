@@ -2,7 +2,10 @@
 // All rights reserved
 package org.springframework.beans.factory.config;
 
+import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
+
+import javax.annotation.Nullable;
 
 /**
  * @author yangmeng
@@ -12,5 +15,13 @@ import org.springframework.beans.factory.HierarchicalBeanFactory;
 public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, SingletonBeanRegistry {
     String SCOPE_SINGLETON = "singleton";
     String SCOPE_PROTOTYPE = "prototype";
+
+    void setBeanClassLoader(@Nullable ClassLoader beanClassLoader);
+
+    void addPropertyEditorRegistrar(PropertyEditorRegistrar registrar);
+
+    void addBeanPostProcessor(BeanPostProcessor beanPostProcessor);
+
+    void registerResolvableDependency(Class<?> dependencyType, @Nullable Object autowiredValue);
 
 }

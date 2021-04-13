@@ -3,12 +3,15 @@
 package org.springframework.context.annotation;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.type.AnnotationMetadata;
 
 import javax.annotation.Nullable;
 import java.util.LinkedHashSet;
@@ -26,8 +29,8 @@ public abstract class AnnotationConfigUtils {
         log.info("source:{}", source);
 
         DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) registry;
-        beanFactory.setDependencyComparator(null);
-        beanFactory.setAutowireCandidateResolver(null);
+        beanFactory.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+        beanFactory.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver());
 
         Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<>(8);
         if (!registry.containsBeanDefinition("org.springframework.context.annotation.internalConfigurationAnnotationProcessor")) {
@@ -59,5 +62,13 @@ public abstract class AnnotationConfigUtils {
         BeanDefinitionHolder beanDefinitionHolder = new BeanDefinitionHolder(definition, beanName);
         log.info("processName:{} role:{}", beanName, definition.getRole());
         return beanDefinitionHolder;
+    }
+
+    public static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition candidate) {
+        processCommonDefinitionAnnotations(candidate, candidate.getMetadata());
+    }
+
+    private static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition candidate, AnnotationMetadata metadata) {
+
     }
 }

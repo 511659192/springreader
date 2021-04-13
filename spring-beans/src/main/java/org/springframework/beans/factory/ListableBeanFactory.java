@@ -10,4 +10,6 @@ package org.springframework.beans.factory;
 public interface ListableBeanFactory extends BeanFactory {
 
     int getBeanDefinitionCount();
+
+    String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletions, boolean allowEagerInit);
 }

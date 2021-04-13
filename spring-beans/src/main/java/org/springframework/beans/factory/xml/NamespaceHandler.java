@@ -11,6 +11,7 @@ import org.w3c.dom.Element;
  * @created 2021/3/26 5:12 下午
  **/
 public interface NamespaceHandler {
+
     BeanDefinition parse(Element element, ParserContext parserContext);
 
     void init();

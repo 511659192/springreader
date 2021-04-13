@@ -4,7 +4,6 @@ package org.springframework.beans.factory.xml;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -39,10 +38,23 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
     }
 
     private void doRegisterBeanDefinitions(Element root) {
-        this.delegate = new BeanDefinitionParserDelegate(this.readerContext);
+        this.delegate = createDelegate(this.readerContext, root);
+
+        acceptsProfiles(root.getAttribute("profile"));
+
         preProcessXml(root);
         parseBeanDefinitions(root, this.delegate);
         postProcessXml(root);
+    }
+
+    private void acceptsProfiles(String profile) {
+
+    }
+
+    private BeanDefinitionParserDelegate createDelegate(XmlReaderContext readerContext, Element root) {
+        BeanDefinitionParserDelegate delegate = new BeanDefinitionParserDelegate(readerContext);
+        delegate.initDefault(root);
+        return delegate;
     }
 
     private void postProcessXml(Element root) {

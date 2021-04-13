@@ -93,4 +93,7 @@ public class BeanDefinitionParserDelegate {
         beanDefinition.setBeanName(beanName);
         return beanDefinition;
     }
+
+    public void initDefault(Element root) {
+    }
 }

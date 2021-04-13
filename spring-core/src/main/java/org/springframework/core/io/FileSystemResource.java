@@ -24,9 +24,11 @@ public class FileSystemResource implements Resource {
     @Getter
     File file;
 
+    String path;
     Path filePath;
 
     public FileSystemResource(File file) {
+        this.path = file.getPath();
         this.file = file;
         this.filePath = file.toPath();
     }
@@ -43,7 +45,7 @@ public class FileSystemResource implements Resource {
     @Override
     public URL getURL() {
         try {
-            return file.toURL();
+            return this.file.toURI().toURL();
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

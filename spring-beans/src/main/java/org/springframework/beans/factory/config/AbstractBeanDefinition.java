@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.BeanMetadataAttributeAccessor;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.support.BeanDefinitionDefaults;
 import org.springframework.core.io.Resource;
 
 import javax.annotation.Nullable;
@@ -94,5 +95,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
     @Override
     public MutablePropertyValues getPropertyValues() {
         return Optional.ofNullable(this.propertyValues).orElseGet(() -> new MutablePropertyValues());
+    }
+
+    public void applyDefaults(BeanDefinitionDefaults definitionDefaults) {
+
     }
 }

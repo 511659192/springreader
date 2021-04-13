@@ -21,4 +21,16 @@ public class ResolvableType {
     public static Class<?> resolve(ResolvableType targetType) {
         return targetType.resolved;
     }
+
+    public static ResolvableType forRawClass(Class<?> typeToMatch) {
+        return null;
+    }
+
+    public boolean isInstance(Object singleton) {
+        return singleton != null && isAssignableFrom(singleton.getClass());
+    }
+
+    public boolean isAssignableFrom(Class<?> beanClass) {
+        return resolved.isAssignableFrom(beanClass);
+    }
 }

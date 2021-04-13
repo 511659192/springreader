@@ -14,6 +14,8 @@ import org.xml.sax.InputSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author yangmeng
@@ -22,6 +24,9 @@ import java.io.InputStream;
  **/
 @Slf4j
 public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
+
+    // todo
+    private final ThreadLocal<Set<Resource>> resourcesCurrentlyBeingLoaded = ThreadLocal.withInitial(() -> new HashSet<>(4));
 
 
     private SourceExtractor sourceExtractor = new NullSourceExtractor();

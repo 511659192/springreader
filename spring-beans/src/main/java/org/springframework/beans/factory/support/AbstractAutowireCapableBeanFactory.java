@@ -13,7 +13,9 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author yangmeng
@@ -101,8 +103,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         }
     }
 
+
     private BeanWrapper createBeanInstance(String beanName, RootBeanDefinition mbd, Object... args) {
-        Class<?> beanClass = resolveBeanClass(mbd, beanName);
+        Class<?> beanClass = resolveBeanClass(mbd);
 
         if (mbd.getFactoryMethodName() != null) {
             // todo
@@ -186,7 +189,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             return getTypeForFactoryMethod(beanName, mbd, targetType);
         }
 
-        return resolveBeanClass(mbd, beanName, typesToMatch);
+        return resolveBeanClass(mbd);
     }
 
     private Class<?> getTypeForFactoryMethod(String beanName, RootBeanDefinition mbd, Class<?>... targetType) {
@@ -194,4 +197,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
 
+    private final Set<Class<?>> ignoredDependencyInterfaces = new HashSet<>();
+
+    public void ignoreDependencyInterface(Class<?> type) {
+        this.ignoredDependencyInterfaces.add(type);
+    }
 }

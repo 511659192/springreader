@@ -35,6 +35,8 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
     @Getter
     private ResourceLoader resourceLoader;
 
+    private BeanNameGenerator beanNameGenerator = BeanNameGenerator.DEFAULT_BEAN_NAME_GENERATOR;
+
     public AbstractBeanDefinitionReader(BeanDefinitionRegistry registry) {
         log.info("");
         this.registry = registry;
@@ -46,8 +48,6 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
             loadBeanDefinitions(location);
         }
     }
-
-    BinaryOperator<Integer> accumulator = (a, b) -> a + b;
 
     private int loadBeanDefinitions(String location) throws Exception {
         Resource[] resources = ((ResourcePatternResolver) resourceLoader).getResources(location);

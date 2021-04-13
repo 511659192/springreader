@@ -16,9 +16,9 @@ import java.util.Set;
  * @version 1.0
  * @created 2021/3/25 7:55 下午
  **/
+@Slf4j
 public abstract class AbstractPropertyResolver implements ConfigurablePropertyResolver {
 
-    Logger log = LoggerFactory.getLogger(getClass());
     @Override
     public String resolveRequiredPlaceholders(String text) {
         log.info("#resolveRequiredPlaceholders text:{}", text);

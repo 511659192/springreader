@@ -31,6 +31,9 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
     boolean postProcessed = false;
 
+    @Nullable
+    volatile Boolean isFactoryBean;
+
     RootBeanDefinition(BeanDefinition original) {
         super(original);
     }
@@ -45,7 +48,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
         }
 
         ResolvableType targetType = this.targetType;
-        return ResolvableType.resolve(targetType);
+        return targetType != null ? ResolvableType.resolve(targetType) : null;
     }
 
     @Override

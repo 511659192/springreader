@@ -2,8 +2,6 @@
 // All rights reserved
 package org.springframework.beans.factory.config;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.beans.factory.ListableBeanFactory;
 
 /**
@@ -11,5 +9,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
  * @version 1.0
  * @created 2021/3/23 3:08 下午
  **/
-public interface ConfigurableListableBeanFactory extends ListableBeanFactory {
+public interface ConfigurableListableBeanFactory extends ConfigurableBeanFactory, ListableBeanFactory {
+
+    void ignoreDependencyInterface(Class<?> type);
 }

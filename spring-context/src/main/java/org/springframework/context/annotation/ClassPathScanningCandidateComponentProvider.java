@@ -19,6 +19,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
@@ -65,7 +66,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
     public void setResourceLoader(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
         this.resourcePatternResolver = getResourcePatternResolver(resourceLoader);
-        this.metadataReaderFactory = new SimpleMetadataReaderFactory(this.resourceLoader);
+        this.metadataReaderFactory = new CachingMetadataReaderFactory(this.resourceLoader);
     }
 
     private ResourcePatternResolver getResourcePatternResolver(ResourceLoader resourceLoader) {

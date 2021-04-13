@@ -5,8 +5,13 @@ package org.springframework.context.support;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.Aware;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.support.ResourceEditorRegistrar;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
@@ -15,6 +20,8 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -32,6 +39,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     @Setter
     private ConfigurableEnvironment environment;
 
+    private final List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>();
+
     public AbstractApplicationContext() {
         log.info("");
         ResourceLoader resourceLoader = this;
@@ -45,14 +54,52 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
 
     public void refresh() throws BeansException, IllegalStateException {
         ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+        prepareBeanFactory(beanFactory);
+
+        invokeBeanFactoryPostProcessors(beanFactory);
+
+    }
+
+    public List<BeanFactoryPostProcessor> getBeanFactoryPostProcessors() {
+        return this.beanFactoryPostProcessors;
+    }
+
+    private void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
+        PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());
+    }
+
+    private void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+        ClassLoader classLoader = getClassLoader();
+        beanFactory.setBeanClassLoader(classLoader);
+
+        beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
+        beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
+
+        beanFactory.ignoreDependencyInterface(Aware.class);
+
+        beanFactory.registerResolvableDependency(BeanFactory.class, beanFactory);
+        beanFactory.registerResolvableDependency(ResourceLoader.class, this);
+        beanFactory.registerResolvableDependency(ApplicationContext.class, this);
+//        beanFactory.registerResolvableDependency(ApplicationEventPublisher.class, this);
+
+
+        beanFactory.addBeanPostProcessor(new ApplicationListenerDetector(this));
+
+        if (!beanFactory.containsLocalBean("environment")) {
+            beanFactory.registerSingleton("environment", getEnvironment());
+        }
+        if (!beanFactory.containsLocalBean("systemProperties")) {
+            beanFactory.registerSingleton("systemProperties", getEnvironment().getSystemProperties());
+        }
+        if (!beanFactory.containsLocalBean("systemEnvironment")) {
+            beanFactory.registerSingleton("systemEnvironment", getEnvironment().getSystemEnvironment());
+        }
     }
 
     protected ConfigurableListableBeanFactory obtainFreshBeanFactory() {
         refreshBeanFactory();
         return getBeanFactory();
     }
-
-    protected abstract ConfigurableListableBeanFactory getBeanFactory() throws IllegalStateException;
 
     protected abstract void refreshBeanFactory() throws BeansException, IllegalStateException;
 
@@ -83,5 +130,20 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     public Resource[] getResources(String locationPattern) {
         log.info("locationPattern:{}", locationPattern);
         return this.resourcePatternResolver.getResources(locationPattern);
+    }
+
+    @Override
+    public boolean containsLocalBean(String name) {
+        return getBeanFactory().containsLocalBean(name);
+    }
+
+    @Override
+    public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletions, boolean allowEagerInit) {
+        return getBeanFactory().getBeanNamesForType(type, includeNonSingletions, allowEagerInit);
+    }
+
+    @Override
+    public boolean isTypeMatch(String name, Class<?> typeToMatch) {
+        return getBeanFactory().isTypeMatch(name, typeToMatch);
     }
 }

@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 /**
  * @author yangmeng
  * @version 1.0
@@ -33,5 +35,16 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
     public String resolveRequiredPlaceholders(String text) {
         log.info("text:{}", text);
         return this.propertyResolver.resolveRequiredPlaceholders(text);
+    }
+
+    @Override
+    public Map<String, Object> getSystemEnvironment() {
+        return (Map) System.getenv();
+    }
+
+
+    @Override
+    public Map<String, Object> getSystemProperties() {
+        return (Map) System.getProperties();
     }
 }

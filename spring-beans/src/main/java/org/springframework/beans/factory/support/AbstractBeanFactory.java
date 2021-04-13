@@ -17,7 +17,9 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.util.ClassUtils;
 
 import java.beans.PropertyEditor;
 import java.util.ArrayList;
@@ -25,6 +27,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -59,6 +62,24 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
     @Getter
     private ConversionService conversionService;
 
+    public boolean isTypeMatch(String name, ResolvableType typeToMatch, boolean allowFactoryBeanInit) {
+        String beanName = transformedBeanName(name);
+        Object beanInstance = getSingleton(beanName);
+        if (beanInstance != null) {
+            return typeToMatch.isInstance(beanInstance);
+        }
+
+        RootBeanDefinition rootBeanDefinition = getMergedLocalBeanDefinition(beanName);
+        Class<?> beanClass = rootBeanDefinition.getBeanClass();
+        return typeToMatch.isAssignableFrom(beanClass);
+    }
+
+    @Override
+    public boolean isTypeMatch(String name, Class<?> typeToMatch) {
+        ResolvableType resolvableType = ResolvableType.forRawClass(typeToMatch);
+        return isTypeMatch(name, resolvableType, false);
+    }
+
     @Override
     public <T> T getBean(String name, Class<T> classType) throws BeansException {
         return doGetBean(name, classType);
@@ -84,15 +105,15 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         return (T) bean;
     }
 
-    protected Class<?> resolveBeanClass(RootBeanDefinition mbd, String beanName, Class<?>... typesToMatch) {
+    protected Class<?> resolveBeanClass(RootBeanDefinition mbd) {
         if (mbd.getBeanClass() != null) {
             return mbd.getBeanClass();
         }
 
-        return doResolveBeanClass(mbd, typesToMatch);
+        return doResolveBeanClass(mbd);
     }
 
-    private Class<?> doResolveBeanClass(RootBeanDefinition mbd, Class<?>[] typesToMatch) {
+    private Class<?> doResolveBeanClass(RootBeanDefinition mbd) {
         ClassLoader beanClassLoader = getBeanClassLoader();
         return mbd.resolveBeanClass(beanClassLoader);
     }
@@ -103,13 +124,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         return name;
     }
 
-    protected Object getObjectForBeanInstance(
-            Object beanInstance, String name, String beanName, RootBeanDefinition mbd) {
+    protected Object getObjectForBeanInstance(Object beanInstance, String name, String beanName, RootBeanDefinition mbd) {
         return beanInstance;
     }
 
 
-    private RootBeanDefinition getMergedLocalBeanDefinition(String beanName) {
+    protected RootBeanDefinition getMergedLocalBeanDefinition(String beanName) {
         RootBeanDefinition mergedBeanDefinition = this.mergedBeanDefinitions.get(beanName);
         if (mergedBeanDefinition != null) {
             return mergedBeanDefinition;
@@ -119,11 +139,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         return getMergedBeanDefinition(beanName, beanDefinition);
     }
 
-    protected RootBeanDefinition getMergedBeanDefinition(String beanName, BeanDefinition beanDefinition) {
+    private RootBeanDefinition getMergedBeanDefinition(String beanName, BeanDefinition beanDefinition) {
         synchronized (this.mergedBeanDefinitions) {
             RootBeanDefinition mdb = this.mergedBeanDefinitions.get(beanName);
             if (mdb == null) {
                 mdb = new RootBeanDefinition(beanDefinition);
+                this.mergedBeanDefinitions.put(beanName, mdb);
             }
             return mdb;
         }
@@ -166,7 +187,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         return cache;
     }
 
-
+    @Override
+    public void setBeanClassLoader(ClassLoader beanClassLoader) {
+        this.beanClassLoader = Optional.ofNullable(beanClassLoader).orElseGet(() -> ClassUtils.getDefaultClassLoader());
+    }
 
     protected void initBeanWrapper(BeanWrapper beanWrapper) {
         beanWrapper.setConversionService(this.getConversionService());
@@ -185,6 +209,24 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         this.customEditors.forEach((beanType, editorClass) -> registry.registerCustomEditor(beanType, BeanUtils.instantiateClass(editorClass)));
     }
 
+    @Override
+    public void addPropertyEditorRegistrar(PropertyEditorRegistrar registrar) {
+        this.propertyEditorRegistrars.add(registrar);
+    }
+
+    @Override
+    public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
+        this.beanPostProcessors.remove(beanPostProcessor);
+        this.beanPostProcessors.add(beanPostProcessor);
+    }
+
+    @Override
+    public boolean containsLocalBean(String name) {
+        String beanName = transformedBeanName(name);
+        return containsSingleton(name) || this.containsBeanDefinition(beanName);
+     }
+
+    public abstract boolean containsBeanDefinition(String className);
 
     /**
      * Internal cache of pre-filtered post-processors.

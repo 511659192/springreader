@@ -25,4 +25,6 @@ public interface BeanDefinition {
     MutablePropertyValues getPropertyValues();
 
     void setRole(int role);
+
+    Class<?> getBeanClass();
 }

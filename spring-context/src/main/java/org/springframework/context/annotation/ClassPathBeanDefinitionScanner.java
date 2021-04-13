@@ -3,8 +3,11 @@
 package org.springframework.context.annotation;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
+import org.springframework.beans.factory.config.AbstractBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.support.BeanDefinitionDefaults;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
@@ -28,6 +31,8 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 
     private BeanNameGenerator beanNameGenerator = BeanNameGenerator.ANNOTATION_BEAN_NAME_GENERATOR;
 
+    BeanDefinitionDefaults definitionDefaults;
+
     public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, Environment environment, ResourceLoader resourceLoader) {
         this.registry = registry;
         setEnvironment(environment);
@@ -44,9 +49,15 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
         Set<BeanDefinitionHolder> allBeanDefinitions = new LinkedHashSet<>();
         for (String basePackage : basePackages) {
             Set<BeanDefinition> definitions = findCandidateComponents(basePackage);
-            definitions.forEach(beanDefinition -> {
-                String beanName = beanNameGenerator.generateBeanName(beanDefinition, registry);
-                BeanDefinitionHolder holder = new BeanDefinitionHolder(beanDefinition, beanName);
+            definitions.forEach(candidate -> {
+                String beanName = beanNameGenerator.generateBeanName(candidate, registry);
+                if (candidate instanceof AbstractBeanDefinition) {
+                    postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
+                }
+                if (candidate instanceof AnnotatedBeanDefinition) {
+                    AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
+                }
+                BeanDefinitionHolder holder = new BeanDefinitionHolder(candidate, beanName);
                 allBeanDefinitions.add(holder);
                 registerBeanDefinition(holder, registry);
 
@@ -58,5 +69,9 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 
     protected void registerBeanDefinition(BeanDefinitionHolder definitionHolder, BeanDefinitionRegistry registry) {
         BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, registry);
+    }
+
+    protected void postProcessBeanDefinition(AbstractBeanDefinition beanDefinition, String beanName) {
+        beanDefinition.applyDefaults(this.definitionDefaults);
     }
 }

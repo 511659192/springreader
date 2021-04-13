@@ -5,9 +5,7 @@ package org.springframework.beans.factory;
 /**
  * @author yangmeng
  * @version 1.0
- * @created 2021/3/23 3:30 下午
+ * @created 2021/4/13 5:08 下午
  **/
-public interface HierarchicalBeanFactory extends BeanFactory {
-
-    boolean containsLocalBean(String name);
+public interface FactoryBean {
 }
