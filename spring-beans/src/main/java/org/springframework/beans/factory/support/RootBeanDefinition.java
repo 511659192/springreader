@@ -50,11 +50,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", RootBeanDefinition.class.getSimpleName() + "[", "]").add(
-                "beforeInstantiationResolved=" + beforeInstantiationResolved).add("resolvedTargetType=" + resolvedTargetType).add(
-                "targetType=" + targetType).add("constructorArgumentLock=" + constructorArgumentLock).add("postProcessingLock=" + postProcessingLock)
-                                                                                          .add("resolvedConstructorOrFactoryMethod="
-                                                                                                       + resolvedConstructorOrFactoryMethod).add(
-                        "postProcessed=" + postProcessed).toString();
+        return new StringJoiner(", ", RootBeanDefinition.class.getSimpleName() + "[", "]").add("beforeInstantiationResolved=" + beforeInstantiationResolved)
+                .add("resolvedTargetType=" + resolvedTargetType).add("targetType=" + targetType).add("constructorArgumentLock=" + constructorArgumentLock)
+                .add("postProcessingLock=" + postProcessingLock).add("resolvedConstructorOrFactoryMethod=" + resolvedConstructorOrFactoryMethod).add("postProcessed=" + postProcessed).toString();
     }
 }

@@ -56,6 +56,8 @@ public abstract class AnnotationConfigUtils {
     private static BeanDefinitionHolder registerPostProcessor(BeanDefinitionRegistry registry, RootBeanDefinition definition, String beanName) {
         definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
         registry.registerBeanDefinition(beanName, definition);
-        return new BeanDefinitionHolder(definition, beanName);
+        BeanDefinitionHolder beanDefinitionHolder = new BeanDefinitionHolder(definition, beanName);
+        log.info("processName:{} role:{}", beanName, definition.getRole());
+        return beanDefinitionHolder;
     }
 }
