@@ -9,6 +9,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProce
 import org.springframework.core.PriorityOrdered;
 import org.springframework.util.JsonUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,12 +21,17 @@ import java.util.List;
 public class PostProcessorRegistrationDelegate {
     public static void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory,
                                                        List<BeanFactoryPostProcessor> beanFactoryPostProcessors) {
-        String[] postProcessorNames =
-                beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
+
+        List<BeanDefinitionRegistryPostProcessor> currentRegistryProcessors = new ArrayList<>();
+
+        String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
+
 
         log.info("postProcessorNames:{}", JsonUtils.toJson(postProcessorNames));
         for (String postProcessorName : postProcessorNames) {
             if (beanFactory.isTypeMatch(postProcessorName, PriorityOrdered.class)) {
+                currentRegistryProcessors.add(beanFactory.getBean(postProcessorName, BeanDefinitionRegistryPostProcessor.class));
+
 
             }
         }

@@ -11,6 +11,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.PropertyEditorRegistrySupport;
+import org.springframework.beans.SimpleTypeConverter;
+import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -21,6 +23,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.util.ClassUtils;
 
+import javax.annotation.Nullable;
 import java.beans.PropertyEditor;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,6 +42,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
  **/
 @Slf4j
 public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport implements ConfigurableBeanFactory {
+
+    @Nullable
+    private TypeConverter typeConverter;
 
     private BeanFactory parentBeanFactory;
 
@@ -91,18 +97,45 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
         Object sharedInstance = getSingleton(beanName);
         if (sharedInstance != null) {
-            bean = getObjectForBeanInstance(sharedInstance, name, beanName, null);
+        } else {
+            RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+            if (mbd.isSingleton()) {
+                sharedInstance = getSingleton(beanName, () -> createBean(beanName, mbd));
+            }
+        }
+
+        bean = getObjectForBeanInstance(sharedInstance, name, beanName, null);
+
+        return (T) bean;
+    }
+
+    <T> T adaptBeanInstance(String name, Object bean, @Nullable Class<?> requiredType) {
+        if (requiredType == null || requiredType.isInstance(bean)) {
             return (T) bean;
         }
 
-        RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+        TypeConverter typeConverter = getTypeConverter();
+        Object convertedBean = typeConverter.convertIfNecessary(bean, requiredType);
+        return (T) convertedBean;
+    }
 
-        if (mbd.isSingleton()) {
-            sharedInstance = getSingleton(beanName, () -> createBean(beanName, mbd));
-            bean = getObjectForBeanInstance(sharedInstance, name, beanName, null);
+    public TypeConverter getTypeConverter() {
+        TypeConverter customConverter = getCustomTypeConverter();
+        if (customConverter != null) {
+            return customConverter;
         }
+        else {
+            // Build default TypeConverter, registering custom editors.
+            SimpleTypeConverter typeConverter = new SimpleTypeConverter();
+            typeConverter.setConversionService(getConversionService());
+            registerCustomEditors(typeConverter);
+            return typeConverter;
+        }
+    }
 
-        return (T) bean;
+    @Nullable
+    protected TypeConverter getCustomTypeConverter() {
+        return this.typeConverter;
     }
 
     protected Class<?> resolveBeanClass(RootBeanDefinition mbd) {

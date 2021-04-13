@@ -2,6 +2,8 @@
 // All rights reserved
 package org.springframework.core;
 
+import lombok.Getter;
+
 import java.lang.reflect.Type;
 
 /**
@@ -11,6 +13,7 @@ import java.lang.reflect.Type;
  **/
 public class ResolvableType {
 
+    @Getter
     private final Type type;
     private Class<?> resolved;
 
@@ -22,8 +25,14 @@ public class ResolvableType {
         return targetType.resolved;
     }
 
-    public static ResolvableType forRawClass(Class<?> typeToMatch) {
-        return null;
+    public static ResolvableType forRawClass(Class<?> clazz) {
+        return new ResolvableType(clazz) {
+
+            @Override
+            public boolean isAssignableFrom(Class<?> beanClass) {
+                return beanClass == null || clazz.isAssignableFrom(beanClass);
+            }
+        };
     }
 
     public boolean isInstance(Object singleton) {
