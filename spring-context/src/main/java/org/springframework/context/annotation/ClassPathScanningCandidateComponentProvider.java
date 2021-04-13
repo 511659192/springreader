@@ -2,17 +2,15 @@
 // All rights reserved
 package org.springframework.context.annotation;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Sets;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
@@ -27,10 +25,9 @@ import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.stereotype.Component;
-import org.springframework.util.GsonUtils;
+import org.springframework.util.JsonUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -89,7 +86,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
         log.info("package:{}", basePackage);
         String path = "classpath*:" + basePackage.replaceAll("\\.", "/") + "/**/*.class";
         Resource[] resources = this.resourcePatternResolver.getResources(path);
-        log.info("resource size:{}", CollectionUtils.size(resources));
+        log.info("resources:{}", JsonUtils.toJson(resources));
 
 
         Set<BeanDefinition> candidates = Sets.newHashSet();

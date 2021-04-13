@@ -4,12 +4,10 @@ package org.springframework.beans.factory.xml;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.PropertiesUtils;
 
 import java.util.Map;
 import java.util.Properties;
-
-import static org.springframework.util.PropertiesUtils.loadAllProperties;
-import static org.springframework.util.PropertiesUtils.prop2Map;
 
 /**
  * @author yangmeng
@@ -40,12 +38,12 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
     @Override
     public NamespaceHandler resolve(String namespaceUri) {
         final Map<String, Object> handlerMappings = getHandlerMappings();
-        Object o = handlerMappings.get(namespaceUri);
-        if (o == null) {
-            throw new RuntimeException("no handler for:" + namespaceUri);
+        Object handlerName = handlerMappings.get(namespaceUri);
+        if (handlerName == null) {
+            throw new RuntimeException("no handlerName for:" + namespaceUri);
         }
 
-        String className = ((String) o);
+        String className = ((String) handlerName);
 
         Class<NamespaceHandler> clazz = ClassUtils.forName(className, false, this.classLoader);
         NamespaceHandler namespaceHandler = ClassUtils.instantiateClass(clazz);
@@ -57,8 +55,8 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
         if (handlerMappings == null) {
             synchronized (this) {
                 if (handlerMappings == null) {
-                    Properties mapping = loadAllProperties(this.handlerMappingsLocation, this.classLoader);
-                    this.handlerMappings = prop2Map(mapping);
+                    Properties mapping = PropertiesUtils.loadAllProperties(this.handlerMappingsLocation, this.classLoader);
+                    this.handlerMappings = PropertiesUtils.prop2Map(mapping);
                 }
             }
         }

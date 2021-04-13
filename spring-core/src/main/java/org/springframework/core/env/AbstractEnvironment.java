@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @created 2021/3/25 7:15 下午
  **/
+@Slf4j
 public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
-    Logger log = LoggerFactory.getLogger(getClass());
 
     private final MutablePropertySources propertySources = new MutablePropertySources();
 

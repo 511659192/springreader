@@ -8,10 +8,9 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
-import org.springframework.beans.factory.support.BeanNameGenerator.DefaultBeanNameGenerator;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.support.ResourceLoader;
-import org.springframework.util.GsonUtils;
+import org.springframework.util.JsonUtils;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -37,7 +36,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
     }
 
     public Set<BeanDefinitionHolder> doScan(String... basePackages) {
-        log.info("packages:{}", GsonUtils.toJson(basePackages));
+        log.info("packages:{}", JsonUtils.toJson(basePackages));
         if (basePackages.length == 0) {
             return Collections.emptySet();
         }

@@ -54,6 +54,7 @@ public class SimpleAnnotationMetadataReadingVisitor extends ClassVisitor {
     public SimpleAnnotationMetadataReadingVisitor(ClassLoader classLoader) {
         super(ASM_VERSION);
         this.classLoader = classLoader;
+        log.info("");
     }
 
     @Override

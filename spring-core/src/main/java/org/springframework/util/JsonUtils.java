@@ -2,6 +2,7 @@
 // All rights reserved
 package org.springframework.util;
 
+import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
 
 /**
@@ -9,12 +10,12 @@ import com.google.gson.Gson;
  * @version 1.0
  * @created 2021/4/8 2:19 下午
  **/
-public class GsonUtils {
+public class JsonUtils {
 
     private final static Gson GSON = new Gson();
 
     public static String toJson(Object obj) {
-        return GSON.toJson(obj);
+        return JSON.toJSONString(obj);
     }
 
 }

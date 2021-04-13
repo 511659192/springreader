@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
-import org.springframework.util.GsonUtils;
+import org.springframework.util.JsonUtils;
 
 /**
  * @author yangmeng
@@ -25,7 +25,7 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
     }
 
     public void setConfigLocations(String[] configLocations) {
-        log.info("configLocations:{}", GsonUtils.toJson(configLocations));
+        log.info("configLocations:{}", JsonUtils.toJson(configLocations));
         if (configLocations == null) {
             return;
         }

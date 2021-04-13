@@ -11,6 +11,7 @@ import org.springframework.core.type.ClassMetadata;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.StringJoiner;
 
 /**
  * @author yangmeng
@@ -37,6 +38,7 @@ public class SimpleMetadataReader implements MetadataReader {
             throw new RuntimeException(e);
         }
 
+        log.info(resource + "");
         SimpleAnnotationMetadataReadingVisitor visitor = new SimpleAnnotationMetadataReadingVisitor(classLoader);
         classReader.accept(visitor, ClassReader.SKIP_DEBUG);
         this.resource = resource;
@@ -53,5 +55,11 @@ public class SimpleMetadataReader implements MetadataReader {
     @Override
     public AnnotationMetadata getAnnotationMetadata() {
         return annotationMetadata;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", SimpleMetadataReader.class.getSimpleName() + "[", "]").add("resource=" + resource).add(
+                "annotationMetadata=" + annotationMetadata).add("classLoader=" + classLoader).toString();
     }
 }

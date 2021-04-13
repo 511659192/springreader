@@ -2,11 +2,14 @@
 // All rights reserved
 package org.springframework.core.env;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author yangmeng
  * @version 1.0
  * @created 2021/3/25 7:18 下午
  **/
+@Slf4j
 public class StandardEnvironment extends AbstractEnvironment {
 
     @Override

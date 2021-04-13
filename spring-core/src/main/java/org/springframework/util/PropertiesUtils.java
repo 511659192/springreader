@@ -26,7 +26,7 @@ public abstract class PropertiesUtils {
 
     public static Properties loadAllProperties(String resourceName, @Nullable ClassLoader classLoader) {
         try {
-            ClassLoader using = Optional.ofNullable(classLoader).orElse(Thread.currentThread().getContextClassLoader());
+            ClassLoader using = Optional.ofNullable(classLoader).orElseGet(() -> Thread.currentThread().getContextClassLoader());
             Enumeration<URL> urls = using != null ? using.getResources(resourceName) : ClassLoader.getSystemResources(resourceName);
             Properties properties = new Properties();
             while (urls.hasMoreElements()) {

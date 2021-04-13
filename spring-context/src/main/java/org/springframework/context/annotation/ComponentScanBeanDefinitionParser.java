@@ -28,8 +28,8 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
     public BeanDefinition parse(Element element, ParserContext parserContext) {
         log.info("tagName:{}", element.getTagName());
 
-        String attribute = element.getAttribute("base-package");
-        String[] basePackages = StringUtils.split(attribute, ",");
+        String basePackagesAttr = element.getAttribute("base-package");
+        String[] basePackages = StringUtils.split(basePackagesAttr, ",");
         ClassPathBeanDefinitionScanner scanner = configScanner(element, parserContext);
         Set<BeanDefinitionHolder> beanDefinitions = scanner.doScan(basePackages);
         registerComponents(parserContext.getReaderContext(), beanDefinitions, element);
