@@ -10,4 +10,5 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
  * @created 2021/4/8 10:24 上午
  **/
 public interface BeanDefinitionRegistryPostProcessor extends BeanFactoryPostProcessor {
+    void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry);
 }

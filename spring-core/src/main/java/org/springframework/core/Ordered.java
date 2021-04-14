@@ -8,4 +8,9 @@ package org.springframework.core;
  * @created 2021/4/8 10:59 上午
  **/
 public interface Ordered {
+
+    int HIGHEST_PRECEDENCE = Integer.MIN_VALUE;
+    int LOWEST_PRECEDENCE = Integer.MAX_VALUE;
+
+    int getOrder();
 }

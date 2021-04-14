@@ -11,7 +11,6 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.support.ResourceEditorRegistrar;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
@@ -55,9 +54,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     public void refresh() throws BeansException, IllegalStateException {
         ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
         prepareBeanFactory(beanFactory);
-
+        postProcessBeanFactory(beanFactory); // no use
         invokeBeanFactoryPostProcessors(beanFactory);
 
+    }
+
+    private void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
     }
 
     public List<BeanFactoryPostProcessor> getBeanFactoryPostProcessors() {
@@ -65,7 +67,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     }
 
     private void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
-        PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());
+        PostProcessorRegistrationDelegate.postProcessBeanFactory(beanFactory, getBeanFactoryPostProcessors());
     }
 
     private void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
