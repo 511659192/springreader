@@ -47,8 +47,6 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
         }
         this.innerBeanDefinitions = innerBeans.toArray(new BeanDefinition[0]);
         this.beanReferences = references.toArray(new BeanReference[0]);
-
-        log.info("after init :{}", this);
     }
 
 

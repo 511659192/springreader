@@ -37,7 +37,6 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 
     @Override
     public int compare(Object l, Object r) {
-        log.info(l + " " + r);
         for (Comparator comparator : this.comparators) {
             int compare = comparator.compare(l, r);
             if (compare != 0) {

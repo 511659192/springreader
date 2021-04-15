@@ -37,7 +37,7 @@ public class BeanDefinitionHolder {
     public BeanDefinitionHolder(BeanDefinitionHolder beanDefinitionHolder) {
         this.beanDefinition = beanDefinitionHolder.getBeanDefinition();
         this.beanName = beanDefinitionHolder.getBeanName();
-        log.info("beanName:{}", beanName);
+//        log.info("beanName:{}", beanName);
     }
 
     @Override

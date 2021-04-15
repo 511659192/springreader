@@ -30,7 +30,7 @@ public class SimpleMetadataReader implements MetadataReader {
     ClassLoader classLoader;
 
     public SimpleMetadataReader(Resource resource, ClassLoader classLoader) {
-        log.info(resource + "");
+//        log.info(resource + "");
 
         SimpleAnnotationMetadataReadingVisitor visitor = new SimpleAnnotationMetadataReadingVisitor(classLoader);
         ClassReader classReader = getClassReader(resource);
@@ -38,7 +38,7 @@ public class SimpleMetadataReader implements MetadataReader {
         this.resource = resource;
         this.annotationMetadata = visitor.getMetadata();
 
-        log.info("");
+//        log.info("");
     }
 
     private ClassReader getClassReader(Resource resource) {

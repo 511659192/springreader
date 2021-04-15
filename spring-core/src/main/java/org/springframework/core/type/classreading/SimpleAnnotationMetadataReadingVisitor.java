@@ -2,6 +2,7 @@
 // All rights reserved
 package org.springframework.core.type.classreading;
 
+import lombok.extern.slf4j.Slf4j;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -30,9 +31,9 @@ import static org.springframework.util.SpringAsmInfo.ASM_VERSION;
  * @version 1.0
  * @created 2021/4/4 22:30
  **/
+@Slf4j
 public class SimpleAnnotationMetadataReadingVisitor extends ClassVisitor {
 
-    Logger log = LoggerFactory.getLogger(getClass());
     private ClassLoader classLoader;
     private int access;
     private String className;
@@ -54,13 +55,13 @@ public class SimpleAnnotationMetadataReadingVisitor extends ClassVisitor {
     public SimpleAnnotationMetadataReadingVisitor(ClassLoader classLoader) {
         super(ASM_VERSION);
         this.classLoader = classLoader;
-        log.info("");
+//        log.info("");
     }
 
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        log.info("begin");
-        log.info("className:{} name:{} signature:{} superName:{} interfaces:{}", className, name, signature, superName, interfaces);
+//        log.info("begin");
+//        log.info("className:{} name:{} signature:{} superName:{} interfaces:{}", className, name, signature, superName, interfaces);
         this.access = access;
         this.className = name.replaceAll("/", ".");
         this.superClassName = superName.replaceAll("/", ".");
@@ -72,7 +73,7 @@ public class SimpleAnnotationMetadataReadingVisitor extends ClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-        log.info("className:{} name:{} signature:{} descriptor:{} exceptions:{}", className, name, signature, descriptor, exceptions);
+//        log.info("className:{} name:{} signature:{} descriptor:{} exceptions:{}", className, name, signature, descriptor, exceptions);
         // 桥接方法不处理
         if ((access & Opcodes.ACC_BRIDGE) == 0) {
             return null;
@@ -87,15 +88,15 @@ public class SimpleAnnotationMetadataReadingVisitor extends ClassVisitor {
 
     @Override
     public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-        log.info("className:{} descriptor:{} visible:{}", className, descriptor, visible);
+//        log.info("className:{} descriptor:{} visible:{}", className, descriptor, visible);
         Consumer<MergedAnnotation<Annotation>> consumer = this.annotations::add;
         return MergedAnnotationReadingVisitor.get(this.classLoader, this::getSource, descriptor, visible, consumer);
     }
 
     @Override
     public void visitEnd() {
-        log.info("className:{}", className);
-        log.info("end \n");
+//        log.info("className:{}", className);
+//        log.info("end \n");
         String[] memberClassNames = null;
         MethodMetadata[] annotatedMethods = null;
         MergedAnnotations annotations = MergedAnnotations.of(this.annotations);

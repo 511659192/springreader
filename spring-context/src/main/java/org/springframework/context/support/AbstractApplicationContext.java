@@ -95,7 +95,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     }
 
     private void initLifecycleProcessor() {
-
+        ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+        if (beanFactory.containsLocalBean("lifecycleProcessor")) {
+            this.lifecycleProcessor = beanFactory.getBean("lifecycleProcessor", LifecycleProcessor.class);
+        } else {
+            DefaultLifecycleProcessor defaultLifecycleProcessor = new DefaultLifecycleProcessor();
+            defaultLifecycleProcessor.setBeanFactory(beanFactory);
+            this.lifecycleProcessor = defaultLifecycleProcessor;
+        }
     }
 
     private void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
@@ -199,7 +206,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     }
 
     public ConfigurableEnvironment getEnvironment() {
-        log.info("");
+//        log.info("");
         ConfigurableEnvironment environment = Optional.ofNullable(this.environment).orElseGet(() -> new StandardEnvironment());
         this.environment = environment;
         return environment;
