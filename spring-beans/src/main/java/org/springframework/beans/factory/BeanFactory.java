@@ -16,4 +16,6 @@ public interface BeanFactory {
     <T> T getBean(String beanName, Class<T> classType) throws BeansException;
 
     boolean isTypeMatch(String name, Class<?> typeToMatch);
+
+    boolean containsBean(String name);
 }

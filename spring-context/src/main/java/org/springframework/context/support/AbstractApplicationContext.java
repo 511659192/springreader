@@ -2,6 +2,7 @@
 // All rights reserved
 package org.springframework.context.support;
 
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -11,7 +12,12 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.support.ResourceEditorRegistrar;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.LifecycleProcessor;
+import org.springframework.context.event.ApplicationEventMulticaster;
+import org.springframework.context.event.SimpleApplicationEventMulticaster;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
@@ -19,9 +25,13 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * @author yangmeng
@@ -40,6 +50,16 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
 
     private final List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>();
 
+    @Getter
+    private final Set<ApplicationListener<?>> applicationListeners = new LinkedHashSet<>();
+
+    @Nullable
+    @Getter
+    private ApplicationEventMulticaster applicationEventMulticaster;
+
+    @Getter
+    private LifecycleProcessor lifecycleProcessor;
+
     public AbstractApplicationContext() {
         log.info("");
         ResourceLoader resourceLoader = this;
@@ -56,7 +76,64 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         prepareBeanFactory(beanFactory);
         postProcessBeanFactory(beanFactory); // no use
         invokeBeanFactoryPostProcessors(beanFactory);
+        registerBeanPostProcessors(beanFactory);
 
+        initApplicationEventMulticaster();
+        onRefresh(); // do nothing
+
+        registerListeners();
+
+        finishBeanFactoryInitialization(beanFactory);
+
+        finishRefresh();
+    }
+
+    private void finishRefresh() {
+        initLifecycleProcessor();
+
+        getLifecycleProcessor().onRefresh();
+    }
+
+    private void initLifecycleProcessor() {
+
+    }
+
+    private void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
+        if (beanFactory.containsLocalBean("conversionService") && beanFactory.isTypeMatch("conversionService", ConversionService.class)) {
+            beanFactory.setConversionService(beanFactory.getBean("conversionService", ConversionService.class));
+        }
+
+        beanFactory.preInstantiateSingletons();
+    }
+
+    private void registerListeners() {
+        Set<ApplicationListener<?>> applicationListeners = getApplicationListeners();
+        for (ApplicationListener<?> applicationListener : applicationListeners) {
+            getApplicationEventMulticaster().addApplicationListener(applicationListener);
+        }
+
+        String[] listenerBeanNames = getBeanNamesForType(ApplicationListener.class, true, false);
+        for (String listenerBeanName : listenerBeanNames) {
+            getApplicationEventMulticaster().addApplicationListenerBean(listenerBeanName);
+        }
+    }
+
+    private void initApplicationEventMulticaster() {
+        ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+        if (beanFactory.containsLocalBean("applicationEventMulticaster")) {
+            this.applicationEventMulticaster = beanFactory.getBean("applicationEventMulticaster", ApplicationEventMulticaster.class);
+        } else {
+            this.applicationEventMulticaster = new SimpleApplicationEventMulticaster(beanFactory);
+            beanFactory.registerSingleton("applicationEventMulticaster", this.applicationEventMulticaster);
+        }
+    }
+
+    private void onRefresh() {
+        // todo do nothing
+    }
+
+    private void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory) {
+        PostProcessorRegistrationDelegate.registerBeanPostProcessors(beanFactory, this);
     }
 
     private void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
@@ -67,7 +144,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     }
 
     private void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
-        PostProcessorRegistrationDelegate.postProcessBeanFactory(beanFactory, getBeanFactoryPostProcessors());
+        PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());
     }
 
     private void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
@@ -140,6 +217,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     }
 
     @Override
+    public boolean containsBean(String name) {
+        return getBeanFactory().containsBean(name);
+    }
+
+    @Override
     public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletions, boolean allowEagerInit) {
         return getBeanFactory().getBeanNamesForType(type, includeNonSingletions, allowEagerInit);
     }
@@ -147,5 +229,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     @Override
     public boolean isTypeMatch(String name, Class<?> typeToMatch) {
         return getBeanFactory().isTypeMatch(name, typeToMatch);
+    }
+
+    @Override
+    public <T> Map<String, T> getBeansOfType(@Nullable Class<T> type) {
+        return getBeanFactory().getBeansOfType(type);
     }
 }

@@ -12,4 +12,6 @@ import org.springframework.beans.factory.ListableBeanFactory;
 public interface ConfigurableListableBeanFactory extends ConfigurableBeanFactory, ListableBeanFactory {
 
     void ignoreDependencyInterface(Class<?> type);
+
+    void preInstantiateSingletons();
 }

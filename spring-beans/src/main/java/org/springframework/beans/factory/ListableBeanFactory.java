@@ -2,6 +2,9 @@
 // All rights reserved
 package org.springframework.beans.factory;
 
+import javax.annotation.Nullable;
+import java.util.Map;
+
 /**
  * @author yangmeng
  * @version 1.0
@@ -12,4 +15,6 @@ public interface ListableBeanFactory extends BeanFactory {
     int getBeanDefinitionCount();
 
     String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletions, boolean allowEagerInit);
+
+    <T> Map<String, T> getBeansOfType(@Nullable Class<T> type);
 }

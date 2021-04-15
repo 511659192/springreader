@@ -6,6 +6,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 
 /**
@@ -15,8 +16,15 @@ import org.springframework.core.PriorityOrdered;
  **/
 public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationAwareBeanPostProcessor, MergedBeanDefinitionPostProcessor,
         PriorityOrdered, BeanFactoryAware {
+    private int order = Ordered.LOWEST_PRECEDENCE - 2;
+
     @Override
     public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 
+    }
+
+    @Override
+    public int getOrder() {
+        return this.order;
     }
 }

@@ -3,8 +3,10 @@
 package org.springframework.beans.factory.support;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
@@ -66,6 +68,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
     private final Map<Class<?>, Class<? extends PropertyEditor>> customEditors = new HashMap<>(4);
 
     @Getter
+    @Setter
     private ConversionService conversionService;
 
     public boolean isTypeMatch(String name, ResolvableType typeToMatch, boolean allowFactoryBeanInit) {
@@ -258,6 +261,24 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         String beanName = transformedBeanName(name);
         return containsSingleton(name) || this.containsBeanDefinition(beanName);
      }
+
+    @Override
+    public boolean containsBean(String name) {
+        if (containsLocalBean(name)) {
+            return true;
+        }
+
+        if (this.parentBeanFactory != null) {
+            return this.parentBeanFactory.containsBean(name);
+        }
+
+        return false;
+    }
+
+    @Override
+    public int getBeanPostProcessorCount() {
+        return CollectionUtils.size(this.beanPostProcessors);
+    }
 
     public abstract boolean containsBeanDefinition(String className);
 

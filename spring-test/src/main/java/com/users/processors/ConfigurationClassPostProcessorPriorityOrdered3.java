@@ -1,6 +1,6 @@
 // Copyright (C) 2021 Meituan
 // All rights reserved
-package org.springframework.context.annotation;
+package com.users.processors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -9,10 +9,10 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProce
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.support.ResourceLoader;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * @author yangmeng
@@ -20,7 +20,8 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
  * @created 2021/4/8 10:23 上午
  **/
 @Slf4j
-public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor, PriorityOrdered, ResourceLoaderAware {
+@Component
+public class ConfigurationClassPostProcessorPriorityOrdered3 implements BeanDefinitionRegistryPostProcessor, PriorityOrdered, ResourceLoaderAware {
 
 
     ResourceLoader resourceLoader;
@@ -46,6 +47,6 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
     @Override
     public int getOrder() {
-        return Ordered.HIGHEST_PRECEDENCE;
+        return 3;
     }
 }

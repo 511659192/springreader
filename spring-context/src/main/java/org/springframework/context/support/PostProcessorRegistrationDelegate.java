@@ -6,13 +6,17 @@ import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,19 +28,19 @@ import java.util.Set;
  **/
 @Slf4j
 public class PostProcessorRegistrationDelegate {
-    public static void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory, List<BeanFactoryPostProcessor> beanFactoryPostProcessors) {
+    public static void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory, List<BeanFactoryPostProcessor> beanFactoryPostProcessors) {
 
         Set<String> processedBeans = new HashSet<>();
         List<BeanDefinitionRegistryPostProcessor> registryProcessors = new ArrayList<>();
 
-        List<BeanDefinitionRegistryPostProcessor> priorityOrdereds = postProcessBeanDefinitionRegistry(beanFactory, processedBeans, PriorityOrdered.class);
+        List<BeanDefinitionRegistryPostProcessor> priorityOrdereds = postProcessBeanDefinitionRegistries(beanFactory, processedBeans, PriorityOrdered.class);
         registryProcessors.addAll(priorityOrdereds);
 
-        List<BeanDefinitionRegistryPostProcessor> ordereds = postProcessBeanDefinitionRegistry(beanFactory, processedBeans, Ordered.class);
+        List<BeanDefinitionRegistryPostProcessor> ordereds = postProcessBeanDefinitionRegistries(beanFactory, processedBeans, Ordered.class);
         registryProcessors.addAll(ordereds);
 
         while (true) {
-            List<BeanDefinitionRegistryPostProcessor> normals = postProcessBeanDefinitionRegistry(beanFactory, processedBeans, null);
+            List<BeanDefinitionRegistryPostProcessor> normals = postProcessBeanDefinitionRegistries(beanFactory, processedBeans, null);
             if (CollectionUtils.isNotEmpty(normals)) {
                 registryProcessors.addAll(normals);
             } else {
@@ -44,17 +48,18 @@ public class PostProcessorRegistrationDelegate {
             }
         }
 
-        postProcessBeanFactory(registryProcessors, beanFactory);
-        postProcessBeanFactory(beanFactory, processedBeans, PriorityOrdered.class);
-        postProcessBeanFactory(beanFactory, processedBeans, Ordered.class);
-        postProcessBeanFactory(beanFactory, processedBeans, null);
+        invokeBeanFactoryPostProcessors(registryProcessors, beanFactory);
+
+        postProcessBeanFactories(beanFactory, processedBeans, PriorityOrdered.class);
+        postProcessBeanFactories(beanFactory, processedBeans, Ordered.class);
+        postProcessBeanFactories(beanFactory, processedBeans, null);
     }
 
-    private static List<BeanFactoryPostProcessor> postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory, Set<String> processedBeans, Class<?> requiredType) {
-        List<BeanFactoryPostProcessor> registryPostProcessors = Lists.newArrayList();
+    private static List<BeanFactoryPostProcessor> postProcessBeanFactories(ConfigurableListableBeanFactory beanFactory, Set<String> processedBeans, Class<?> requiredType) {
+        List<BeanFactoryPostProcessor> newProcessors = Lists.newArrayList();
 
-        String[] registryPostPorcessorNames = beanFactory.getBeanNamesForType(BeanFactoryPostProcessor.class, true, false);
-        for (String postProcessorName : registryPostPorcessorNames) {
+        String[] beanFactoryPostProcessorNames = beanFactory.getBeanNamesForType(BeanFactoryPostProcessor.class, true, false);
+        for (String postProcessorName : beanFactoryPostProcessorNames) {
             if (processedBeans.contains(postProcessorName)) {
                 continue;
             }
@@ -63,21 +68,52 @@ public class PostProcessorRegistrationDelegate {
                 continue;
             }
 
-            registryPostProcessors.add(beanFactory.getBean(postProcessorName, BeanFactoryPostProcessor.class));
+            newProcessors.add(beanFactory.getBean(postProcessorName, BeanFactoryPostProcessor.class));
             processedBeans.add(postProcessorName);
         }
 
-        postProcessBeanFactory(registryPostProcessors, beanFactory);
-        return registryPostProcessors;
+        invokeBeanFactoryPostProcessors(newProcessors, beanFactory);
+        return newProcessors;
+    }
+
+    private static List<BeanPostProcessor> registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory, Class<?> requiredType) {
+        List<BeanPostProcessor> newProcessors = Lists.newArrayList();
+
+        String[] beanFactoryPostProcessorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class, true, false);
+        for (String postProcessorName : beanFactoryPostProcessorNames) {
+            if (requiredType != null && !beanFactory.isTypeMatch(postProcessorName, requiredType)) {
+                continue;
+            }
+
+            newProcessors.add(beanFactory.getBean(postProcessorName, BeanPostProcessor.class));
+        }
+        sortPostProcessors(newProcessors, beanFactory);
+        doAddBeanPostProcessors(beanFactory, newProcessors);
+        return newProcessors;
+    }
+
+    private static void doAddBeanPostProcessors(ConfigurableListableBeanFactory beanFactory, List<BeanPostProcessor> newProcessors) {
+        for (BeanPostProcessor beanPostProcessor : newProcessors) {
+            beanFactory.addBeanPostProcessor(beanPostProcessor);
+        }
+    }
+
+    private static void sortPostProcessors(List<?> processors, ConfigurableListableBeanFactory beanFactory) {
+        if (CollectionUtils.size(processors) <= 1) {
+            return;
+        }
+
+        Comparator<Object> dependencyComparator = ((DefaultListableBeanFactory) beanFactory).getDependencyComparator();
+        processors.sort(dependencyComparator);
     }
 
 
-    private static List<BeanDefinitionRegistryPostProcessor> postProcessBeanDefinitionRegistry(ConfigurableListableBeanFactory beanFactory, Set<String> processedBeans, Class<?> requiredType) {
+    private static List<BeanDefinitionRegistryPostProcessor> postProcessBeanDefinitionRegistries(ConfigurableListableBeanFactory beanFactory, Set<String> processedBeans, Class<?> requiredType) {
 
-        List<BeanDefinitionRegistryPostProcessor> registryPostProcessors = Lists.newArrayList();
+        List<BeanDefinitionRegistryPostProcessor> newProcessors = Lists.newArrayList();
 
-        String[] registryPostPorcessorNames = beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
-        for (String postProcessorName : registryPostPorcessorNames) {
+        String[] beanDefinitionRegistryPostProcessorNames = beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
+        for (String postProcessorName : beanDefinitionRegistryPostProcessorNames) {
             if (processedBeans.contains(postProcessorName)) {
                 continue;
             }
@@ -86,24 +122,37 @@ public class PostProcessorRegistrationDelegate {
                 continue;
             }
 
-            registryPostProcessors.add(beanFactory.getBean(postProcessorName, BeanDefinitionRegistryPostProcessor.class));
+            newProcessors.add(beanFactory.getBean(postProcessorName, BeanDefinitionRegistryPostProcessor.class));
             processedBeans.add(postProcessorName);
         }
 
-        postProcessBeanDefinitionRegistry(registryPostProcessors, (BeanDefinitionRegistry) beanFactory);
-        return registryPostProcessors;
+        sortPostProcessors(newProcessors, beanFactory);
+        invokeBeanDefinitionRegistryPostProcessors(newProcessors, (BeanDefinitionRegistry) beanFactory);
+        return newProcessors;
     }
 
-    private static void postProcessBeanFactory(List<? extends BeanFactoryPostProcessor> registryProcessors, ConfigurableListableBeanFactory beanFactory) {
+    private static void invokeBeanFactoryPostProcessors(List<? extends BeanFactoryPostProcessor> registryProcessors, ConfigurableListableBeanFactory beanFactory) {
         for (BeanFactoryPostProcessor registryProcessor : registryProcessors) {
             registryProcessor.postProcessBeanFactory(beanFactory);
         }
     }
 
-    private static void postProcessBeanDefinitionRegistry(List<? extends BeanDefinitionRegistryPostProcessor> postProcessors, BeanDefinitionRegistry registry) {
+    private static void invokeBeanDefinitionRegistryPostProcessors(List<? extends BeanDefinitionRegistryPostProcessor> postProcessors, BeanDefinitionRegistry registry) {
         for (BeanDefinitionRegistryPostProcessor postProcessor : postProcessors) {
             postProcessor.postProcessBeanDefinitionRegistry(registry);
         }
 
+    }
+
+    public static void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory, AbstractApplicationContext applicationContext) {
+        String[] beanPostProcessorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class, true, false);
+
+        int count = beanFactory.getBeanPostProcessorCount() + 1 + CollectionUtils.size(beanPostProcessorNames);
+        beanFactory.addBeanPostProcessor(new BeanPostProcessorChecker(beanFactory, count));
+
+        registerBeanPostProcessors(beanFactory, PriorityOrdered.class);
+        registerBeanPostProcessors(beanFactory, Ordered.class);
+        registerBeanPostProcessors(beanFactory, ((Class) null));
+        registerBeanPostProcessors(beanFactory, MergedBeanDefinitionPostProcessor.class);
     }
 }

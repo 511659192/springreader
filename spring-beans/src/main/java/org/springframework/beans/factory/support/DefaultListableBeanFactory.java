@@ -2,16 +2,15 @@
 // All rights reserved
 package org.springframework.beans.factory.support;
 
+import com.google.common.collect.Maps;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.Aware;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 import javax.annotation.Nullable;
@@ -151,5 +150,32 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     @Override
     public void registerSingleton(String beanName, Object singletonObject) {
         super.registerSingleton(beanName, singletonObject);
+    }
+
+    @Nullable
+    public Comparator<Object> getDependencyComparator() {
+        return this.dependencyComparator;
+    }
+
+    @Override
+    public <T> Map<String, T> getBeansOfType(@Nullable Class<T> type) {
+        return getBeansOfType(type, true, false);
+    }
+
+    public <T> Map<String, T> getBeansOfType(@Nullable Class<T> type, boolean includeNonSingletons, boolean allowEagerInit) {
+        Map<String, T> result = Maps.newHashMap();
+
+        String[] beanNamesForType = getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
+        for (String beanName : beanNamesForType) {
+            T bean = getBean(beanName, type);
+            result.put(beanName, bean);
+        }
+
+        return result;
+    }
+
+    @Override
+    public void preInstantiateSingletons() {
+
     }
 }

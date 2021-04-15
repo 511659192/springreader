@@ -4,6 +4,7 @@ package org.springframework.beans.factory.config;
 
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.factory.HierarchicalBeanFactory;
+import org.springframework.core.convert.ConversionService;
 
 import javax.annotation.Nullable;
 
@@ -24,4 +25,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 
     void registerResolvableDependency(Class<?> dependencyType, @Nullable Object autowiredValue);
 
+    int getBeanPostProcessorCount();
+
+    void setConversionService(@Nullable ConversionService conversionService);
 }
