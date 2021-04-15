@@ -2,6 +2,8 @@
 // All rights reserved
 package org.springframework.core.io;
 
+import com.google.common.base.Objects;
+import com.google.common.hash.HashCode;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -44,5 +46,20 @@ public class ClassPathResource implements Resource {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        ClassPathResource that = (ClassPathResource) o;
+        return Objects.equal(path, that.path) && Objects.equal(classLoader, that.classLoader);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(path);
     }
 }

@@ -11,14 +11,17 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -35,7 +38,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     private Comparator<Object> dependencyComparator;
     private AutowireCandidateResolver autowireCandidateResolver;
     private final Map<Class<?>, Object> resolvableDependencies = new ConcurrentHashMap<>(16);
-
+    private final Map<String, BeanDefinitionHolder> mergedBeanDefinitionHolders = new ConcurrentHashMap<>(256);
+    private final Map<Class<?>, String[]> allBeanNamesByType = new ConcurrentHashMap<>(64);
+    private final Map<Class<?>, String[]> singletonBeanNamesByType = new ConcurrentHashMap<>(64);
+    private volatile Set<String> manualSingletonNames = new LinkedHashSet<>(16);
 
     public DefaultListableBeanFactory(BeanFactory parent) {
         super(parent);

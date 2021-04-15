@@ -3,6 +3,7 @@
 package org.springframework.beans.factory.xml;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.parsing.NullSourceExtractor;
 import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.AbstractBeanDefinitionReader;
@@ -14,6 +15,7 @@ import org.xml.sax.InputSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -38,10 +40,24 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
     @Override
     public int loadBeanDefinitions(Resource resource) {
-        InputSource domInputSource = new InputSource(resource.getInputStream());
-        Document document = doLoadDocument(domInputSource);
-        int count = registerBeanDefinitions(document, resource);
-        return count;
+
+        Set<Resource> currentResources = this.resourcesCurrentlyBeingLoaded.get();
+
+        if (!currentResources.add(resource)) {
+            throw new RuntimeException("multi op");
+        }
+
+        try {
+            InputSource domInputSource = new InputSource(resource.getInputStream());
+            Document document = doLoadDocument(domInputSource);
+            int count = registerBeanDefinitions(document, resource);
+            return count;
+        } finally {
+            currentResources.remove(resource);
+            if (CollectionUtils.isEmpty(currentResources)) {
+                resourcesCurrentlyBeingLoaded.remove();
+            }
+        }
     }
 
     protected Document doLoadDocument(InputSource inputSource) {
@@ -58,10 +74,10 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
     private int registerBeanDefinitions(Document document, Resource resource) {
         log.info("");
-        BeanDefinitionDocumentReader documentReader = new DefaultBeanDefinitionDocumentReader();
         int before = this.getRegistry().getBeanDefinitionCount();
         XmlReaderContext readerContext = createXmlReaderContext(resource);
-        documentReader.registerBeanDefinitions(document, readerContext);
+        BeanDefinitionDocumentReader documentReader = new DefaultBeanDefinitionDocumentReader(readerContext);
+        documentReader.registerBeanDefinitions(document);
         return this.getRegistry().getBeanDefinitionCount() - before;
     }
 

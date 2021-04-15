@@ -2,7 +2,6 @@
 // All rights reserved
 package org.springframework.beans.factory.support;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.BeanFactory;
 
 import java.lang.reflect.Constructor;

@@ -26,18 +26,19 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
     private BeanDefinitionRegistry registry;
 
-    public DefaultBeanDefinitionDocumentReader() {
+    public DefaultBeanDefinitionDocumentReader(XmlReaderContext readerContext) {
+        this.readerContext = readerContext;
+        this.registry = readerContext.getRegistry();
         log.info("");
     }
 
     @Override
-    public void registerBeanDefinitions(Document document, XmlReaderContext readerContext) {
-        this.readerContext = readerContext;
-        this.registry = readerContext.getRegistry();
+    public void registerBeanDefinitions(Document document) {
         doRegisterBeanDefinitions(document.getDocumentElement());
     }
 
     private void doRegisterBeanDefinitions(Element root) {
+        BeanDefinitionParserDelegate parent = this.delegate;
         this.delegate = createDelegate(this.readerContext, root);
 
         acceptsProfiles(root.getAttribute("profile"));
@@ -45,6 +46,8 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
         preProcessXml(root);
         parseBeanDefinitions(root, this.delegate);
         postProcessXml(root);
+
+        this.delegate = parent;
     }
 
     private void acceptsProfiles(String profile) {

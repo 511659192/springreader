@@ -14,4 +14,6 @@ public interface ConfigurableEnvironment extends Environment, ConfigurableProper
     Map<String, Object> getSystemProperties();
 
     Map<String, Object> getSystemEnvironment();
+
+    void merge(Environment parentEnv);
 }

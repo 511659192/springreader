@@ -2,6 +2,7 @@
 // All rights reserved
 package org.springframework.context.support;
 
+import com.google.common.collect.Sets;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.support.ResourceEditorRegistrar;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.LifecycleProcessor;
@@ -19,6 +21,7 @@ import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.SimpleApplicationEventMulticaster;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -60,18 +63,31 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     @Getter
     private LifecycleProcessor lifecycleProcessor;
 
+    @Nullable
+    private Set<ApplicationListener<?>> earlyApplicationListeners;
+
+    @Nullable
+    private Set<ApplicationEvent> earlyApplicationEvents;
+
     public AbstractApplicationContext() {
         log.info("");
-        ResourceLoader resourceLoader = this;
-        this.resourcePatternResolver = new PathMatchingResourcePatternResolver(resourceLoader);
+        this.resourcePatternResolver = new PathMatchingResourcePatternResolver(((ResourceLoader) this));
     }
 
     public AbstractApplicationContext(ApplicationContext parent) {
         this();
         this.parent = parent;
+        if (parent != null) {
+            Environment parentEnv = parent.getEnvironment();
+            if (parentEnv instanceof ConfigurableEnvironment) {
+                getEnvironment().merge(parentEnv);
+            }
+        }
     }
 
     public void refresh() throws BeansException, IllegalStateException {
+        prepareRefresh();
+
         ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
         prepareBeanFactory(beanFactory);
         postProcessBeanFactory(beanFactory); // no use
@@ -86,6 +102,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         finishBeanFactoryInitialization(beanFactory);
 
         finishRefresh();
+    }
+
+    private void prepareRefresh() {
+        if (this.earlyApplicationListeners == null) {
+            this.earlyApplicationListeners = Sets.newHashSet(this.applicationListeners);
+        } else {
+            this.applicationListeners.clear();
+            this.applicationListeners.addAll(this.earlyApplicationListeners);
+        }
+
+        this.earlyApplicationEvents = Sets.newHashSet();
     }
 
     private void finishRefresh() {

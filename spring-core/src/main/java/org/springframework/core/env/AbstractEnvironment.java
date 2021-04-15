@@ -42,6 +42,11 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
         return (Map) System.getenv();
     }
 
+    @Override
+    public void merge(Environment parentEnv) {
+
+    }
+
 
     @Override
     public Map<String, Object> getSystemProperties() {

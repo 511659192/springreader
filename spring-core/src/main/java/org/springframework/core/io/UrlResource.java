@@ -2,8 +2,7 @@
 // All rights reserved
 package org.springframework.core.io;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.google.common.base.Objects;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,5 +53,20 @@ public class UrlResource implements Resource {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        UrlResource that = (UrlResource) o;
+        return Objects.equal(url, that.url);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(url);
     }
 }

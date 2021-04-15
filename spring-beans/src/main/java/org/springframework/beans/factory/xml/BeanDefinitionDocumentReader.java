@@ -2,7 +2,6 @@
 // All rights reserved
 package org.springframework.beans.factory.xml;
 
-import org.springframework.beans.factory.xml.XmlReaderContext;
 import org.w3c.dom.Document;
 
 /**
@@ -11,5 +10,5 @@ import org.w3c.dom.Document;
  * @created 2021/3/23 7:31 下午
  **/
 public interface BeanDefinitionDocumentReader {
-    void registerBeanDefinitions(Document document, XmlReaderContext readerContext);
+    void registerBeanDefinitions(Document document);
 }

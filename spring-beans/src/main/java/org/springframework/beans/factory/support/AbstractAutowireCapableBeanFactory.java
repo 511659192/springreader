@@ -7,7 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -27,11 +30,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
     @Setter
     private InstantiationStrategy instantiationStrategy;
+    private final Set<Class<?>> ignoredDependencyInterfaces = new HashSet<>();
 
     public AbstractAutowireCapableBeanFactory(BeanFactory parentBeanFactory) {
         super(parentBeanFactory);
-        log.info("");
+
+        ignoreDependencyInterface(BeanNameAware.class);
+        ignoreDependencyInterface(BeanFactoryAware.class);
+        ignoreDependencyInterface(BeanClassLoaderAware.class);
+
         this.instantiationStrategy = new CglibSubclassingInstantiationStrategy();
+        log.info("");
     }
 
 
@@ -197,7 +206,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
 
-    private final Set<Class<?>> ignoredDependencyInterfaces = new HashSet<>();
 
     public void ignoreDependencyInterface(Class<?> type) {
         this.ignoredDependencyInterfaces.add(type);
