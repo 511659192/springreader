@@ -2,9 +2,11 @@
 // All rights reserved
 package org.springframework.beans.factory.support;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
@@ -13,10 +15,13 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.NamedBeanHolder;
+import org.springframework.core.ResolvableType;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -82,31 +87,92 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
     }
 
+    public <T> T getBean(Class<T> requiredType, Object... args) {
+        ResolvableType resolvableType = ResolvableType.forRawClass(requiredType);
+        Object resolved = resolveBean(resolvableType, args, false);
+        return (T) Preconditions.checkNotNull(resolved);
+    }
+
+    @Nullable
+    private <T> T resolveBean(ResolvableType requiredType, @Nullable Object[] args, boolean nonUniqueAsNull) {
+        NamedBeanHolder<T> namedBean = resolveNamedBean(requiredType, args, nonUniqueAsNull);
+        if (namedBean != null) {
+            return namedBean.getBeanInstance();
+        }
+
+        BeanFactory parentBeanFactory = getParentBeanFactory();
+        if (parentBeanFactory instanceof DefaultListableBeanFactory) {
+            return ((DefaultListableBeanFactory) parentBeanFactory).resolveBean(requiredType, args, nonUniqueAsNull);
+        }
+
+        return null;
+    }
+
+    private <T> NamedBeanHolder<T> resolveNamedBean(ResolvableType requiredType, Object[] args, boolean nonUniqueAsNull) {
+        String[] candidateNames = getBeanNamesForType(requiredType);
+
+        if (candidateNames.length == 1) {
+            String beanName = candidateNames[0];
+            return resolveNamedBean(beanName, requiredType, args);
+        }
+
+
+        // todo
+        return null;
+    }
+
+    private <T> NamedBeanHolder<T> resolveNamedBean(String beanName, ResolvableType requiredType, Object[] args) {
+        Object bean = getBean(beanName, null, args);
+        if (bean instanceof NullBean) {
+            return null;
+        }
+
+        T beanInstance = adaptBeanInstance(beanName, bean, requiredType.toClass());
+        return new NamedBeanHolder<T>(beanName, beanInstance);
+    }
+
+    private String[] getBeanNamesForType(ResolvableType requiredType) {
+        return getBeanNamesForType(requiredType, true, true);
+    }
+
+    private String[] getBeanNamesForType(ResolvableType requiredType, boolean includeNonSingletions, boolean allowEagerInit) {
+        Class<?> resolved = requiredType.resolve();
+        if (resolved != null && !requiredType.hasGenerics()) {
+            return getBeanNamesForType(resolved, includeNonSingletions, allowEagerInit);
+        }
+
+        return doGetBeanNameForType(requiredType, includeNonSingletions, allowEagerInit);
+    }
+
+    public String[] getBeanNamesForType(Class<?> classType) {
+        return this.getBeanNamesForType(classType, true, true);
+    }
+
     @Override
-    public <T> T getBean(Class<T> classType) throws BeansException {
-        String beanName = getBeanNameForType(classType);
-        return getBean(beanName, classType);
+    public String[] getBeanNamesForType(Class<?> clazz, boolean includeNonSingletons, boolean allowEagerInit) {
+        Map<Class<?>, String[]> cache = (includeNonSingletons ? this.allBeanNamesByType : this.singletonBeanNamesByType);
+
+        if (cache.get(clazz) != null) {
+            return cache.get(clazz);
+        }
+
+        ResolvableType resolvableType = ResolvableType.forRawClass(clazz);
+        String[] beanNameForType = doGetBeanNameForType(resolvableType, includeNonSingletons, allowEagerInit);
+        if (beanNameForType != null) {
+            cache.put(clazz, beanNameForType);
+        }
+        return beanNameForType;
     }
 
-    private <T> String getBeanNameForType(Class<T> classType) {
-        return getBeanNamesForType(classType, true, false)[0];
-    }
-
-    @Override
-    public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletions, boolean allowEagerInit) {
-        return doGetBeanNameForType(type, includeNonSingletions, allowEagerInit);
-    }
-
-    private <T> String[] doGetBeanNameForType(Class<T> targetType, boolean includeNonSingletions, boolean allowEagerInit) {
+    private <T> String[] doGetBeanNameForType(ResolvableType resolvableType, boolean includeNonSingletions, boolean allowEagerInit) {
         List<String> beanDefinitionNames = this.beanDefinitionNames;
         return beanDefinitionNames.stream().filter(beanName -> {
             RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
             boolean isFactoryBean = isFactoryBean(beanName, mbd);
-            boolean matchFound = false;
             if (!isFactoryBean) {
-                matchFound = isTypeMatch(beanName, targetType, allowEagerInit);
+                return isTypeMatch(beanName, resolvableType, allowEagerInit);
             }
-            return matchFound;
+            return false;
         }).toArray(String[]::new);
     }
 
@@ -125,21 +191,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
             return isFactoryBean;
         }
         Class<?> resolveBeanClass = predictBeanType( mbd);
-        boolean resultl = resolveBeanClass != null && FactoryBean.class.isAssignableFrom(resolveBeanClass);
-        mbd.isFactoryBean = resultl;
-        return resultl;
-    }
-
-    private <T> boolean isTypeMatch(String beanName, Class<T> typeToMatch, boolean allowFactoryBeanInit) {
-        Object singleton = getSingleton(beanName);
-        if (singleton != null) {
-            return typeToMatch.isInstance(singleton);
-        }
-
-
-        RootBeanDefinition rootBeanDefinition = getMergedLocalBeanDefinition(beanName);
-        Class<?> beanClass = rootBeanDefinition.getBeanClass();
-        return typeToMatch.isAssignableFrom(beanClass);
+        boolean result = resolveBeanClass != null && FactoryBean.class.isAssignableFrom(resolveBeanClass);
+        mbd.isFactoryBean = result;
+        return result;
     }
 
     @Override
@@ -164,16 +218,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     }
 
     @Override
-    public <T> Map<String, T> getBeansOfType(@Nullable Class<T> type) {
-        return getBeansOfType(type, true, false);
+    public <T> Map<String, T> getBeansOfType(@Nullable Class<T> classType) {
+        return getBeansOfType(classType, true, false);
     }
 
-    public <T> Map<String, T> getBeansOfType(@Nullable Class<T> type, boolean includeNonSingletons, boolean allowEagerInit) {
+    public <T> Map<String, T> getBeansOfType(@Nullable Class<T> classType, boolean includeNonSingletons, boolean allowEagerInit) {
         Map<String, T> result = Maps.newHashMap();
 
-        String[] beanNamesForType = getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
+        String[] beanNamesForType = getBeanNamesForType(classType, includeNonSingletons, allowEagerInit);
         for (String beanName : beanNamesForType) {
-            T bean = getBean(beanName, type);
+            T bean = getBean(beanName, classType);
             result.put(beanName, bean);
         }
 

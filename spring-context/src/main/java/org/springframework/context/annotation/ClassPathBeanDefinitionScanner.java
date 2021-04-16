@@ -2,6 +2,7 @@
 // All rights reserved
 package org.springframework.context.annotation;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.AbstractBeanDefinition;
@@ -33,12 +34,25 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 
     BeanDefinitionDefaults definitionDefaults;
 
-    public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, Environment environment, ResourceLoader resourceLoader) {
+    @Setter
+    private BeanDefinitionDefaults beanDefinitionDefaults;
+
+    @Setter
+    private String[] autowireCandidatePatterns;
+
+    public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, boolean useDefaultFilters, Environment environment, ResourceLoader resourceLoader) {
         this.registry = registry;
         setEnvironment(environment);
         setResourceLoader(resourceLoader);
+
+        if (useDefaultFilters) {
+            registerDefaultFilters();
+        }
+
+
         log.info("");
     }
+
 
     public Set<BeanDefinitionHolder> doScan(String... basePackages) {
         log.info("packages:{}", JsonUtils.toJson(basePackages));
@@ -65,6 +79,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
         }
 
         return allBeanDefinitions;
+
     }
 
     protected void registerBeanDefinition(BeanDefinitionHolder definitionHolder, BeanDefinitionRegistry registry) {
@@ -74,4 +89,5 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
     protected void postProcessBeanDefinition(AbstractBeanDefinition beanDefinition, String beanName) {
         beanDefinition.applyDefaults(this.definitionDefaults);
     }
+
 }

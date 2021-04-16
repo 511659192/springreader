@@ -59,7 +59,6 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 
     public ClassPathScanningCandidateComponentProvider() {
-        this.includeFilters.add(new AnnotationTypeFilter(Component.class));
     }
 
     @Override
@@ -131,4 +130,9 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
         return metadata.isIndependent() && metadata.isConcrete() || (metadata.isAbstract() && metadata.hasAnnotatedMethods(Lookup.class.getName()));
     }
 
+
+    protected void registerDefaultFilters() {
+        this.includeFilters.add(new AnnotationTypeFilter(Component.class));
+
+    }
 }

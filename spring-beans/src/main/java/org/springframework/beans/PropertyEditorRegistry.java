@@ -2,6 +2,7 @@
 // All rights reserved
 package org.springframework.beans;
 
+import javax.annotation.Nullable;
 import java.beans.PropertyEditor;
 
 /**
@@ -12,4 +13,6 @@ import java.beans.PropertyEditor;
 public interface PropertyEditorRegistry {
 
     void registerCustomEditor(Class<?> requiredType, PropertyEditor propertyEditor);
+
+    PropertyEditor findCustomEditor(@Nullable Class<?> requiredType, @Nullable String propertyPath);
 }

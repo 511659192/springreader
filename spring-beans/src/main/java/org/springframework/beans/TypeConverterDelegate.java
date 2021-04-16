@@ -2,6 +2,10 @@
 // All rights reserved
 package org.springframework.beans;
 
+import org.springframework.core.convert.TypeDescriptor;
+
+import javax.annotation.Nullable;
+
 /**
  * @author yangmeng
  * @version 1.0
@@ -12,5 +16,17 @@ public class TypeConverterDelegate {
 
     public TypeConverterDelegate(PropertyEditorRegistrySupport propertyEditorRegistrySupport) {
         this.propertyEditorRegistrySupport = propertyEditorRegistrySupport;
+    }
+
+
+    public <T> T convertIfNecessary(@Nullable String propertyName, @Nullable Object oldValue, @Nullable Object newValue,
+                                    @Nullable Class<T> requiredType, @Nullable TypeDescriptor typeDescriptor) {
+
+
+        this.propertyEditorRegistrySupport.findCustomEditor(requiredType, propertyName);
+
+
+        return null;
+
     }
 }

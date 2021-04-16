@@ -2,6 +2,8 @@
 // All rights reserved
 package org.springframework.beans;
 
+import org.springframework.core.convert.TypeDescriptor;
+
 import javax.annotation.Nullable;
 
 /**
@@ -15,7 +17,12 @@ public class TypeConverterSupport extends PropertyEditorRegistrySupport implemen
     TypeConverterDelegate typeConverterDelegate;
 
     @Override
-    public Object convertIfNecessary(Object bean, Class<?> requiredType) {
-        return null;
+    public <T> T convertIfNecessary(Object bean, Class<T> requiredType) {
+        return convertIfNecessary(bean, requiredType, TypeDescriptor.valueOf(requiredType));
+    }
+
+    private <T> T convertIfNecessary(Object bean, Class<T> requiredType, TypeDescriptor typeDescriptor) {
+        T t = this.typeConverterDelegate.convertIfNecessary(null, null, bean, requiredType, typeDescriptor);
+        return t;
     }
 }

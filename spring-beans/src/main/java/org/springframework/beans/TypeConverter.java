@@ -8,5 +8,5 @@ package org.springframework.beans;
  * @created 2021/3/25 4:02 下午
  **/
 public interface TypeConverter {
-    Object convertIfNecessary(Object bean, Class<?> requiredType);
+    <T> T convertIfNecessary(Object bean, Class<T> requiredType);
 }

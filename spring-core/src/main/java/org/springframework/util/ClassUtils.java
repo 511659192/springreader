@@ -6,6 +6,7 @@ import com.google.common.base.Preconditions;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -70,5 +71,13 @@ public abstract class ClassUtils {
 
     public static ClassLoader getDefaultClassLoader() {
         return Thread.currentThread().getContextClassLoader();
+    }
+
+    public static boolean isContainer(Class<?> clazz) {
+        return Collection.class.isAssignableFrom(clazz) || clazz.isArray();
+    }
+
+    public static boolean isAssignable(Class<?> a, Class<?> b) {
+        return a.isAssignableFrom(b) || b.isAssignableFrom(a);
     }
 }

@@ -53,15 +53,22 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
     }
 
     ClassPathBeanDefinitionScanner configScanner(Element element, ParserContext parserContext) {
-        ClassPathBeanDefinitionScanner scanner = createScanner(parserContext);
+        boolean useDefaultFilters = element.hasAttribute("use-default-filters") ? Boolean.valueOf(element.getAttribute("use-default-filters")) : true;
+        ClassPathBeanDefinitionScanner scanner = createScanner(parserContext, useDefaultFilters);
+        scanner.setBeanDefinitionDefaults(parserContext.getDelegate().getBeanDefinitionDefaults());
+        scanner.setAutowireCandidatePatterns(parserContext.getDelegate().getAutowireCandidatePatterns());
+//        scanner.setResourcePattern(element.getAttribute(RESOURCE_PATTERN_ATTRIBUTE));
+//        scanner.setBeanNameGenerator(beanNameGenerator);
+//        scanner.setScope()
+//        parseTypeFilters(element, scanner, parserContext);
         return scanner;
     }
 
-    private ClassPathBeanDefinitionScanner createScanner(ParserContext parserContext) {
+    private ClassPathBeanDefinitionScanner createScanner(ParserContext parserContext, boolean useDefaultFilters) {
         log.info("");
         XmlReaderContext readerContext = parserContext.getReaderContext();
         BeanDefinitionRegistry registry = readerContext.getRegistry();
-        ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(registry, readerContext.getEnvironment(), readerContext.getResourceLoader());
+        ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(registry, useDefaultFilters, readerContext.getEnvironment(), readerContext.getResourceLoader());
         return scanner;
     }
 

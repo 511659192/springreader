@@ -3,6 +3,7 @@
 package org.springframework.beans.factory.xml;
 
 import lombok.Getter;
+import org.springframework.beans.factory.support.BeanDefinitionDefaults;
 
 /**
  * @author yangmeng
@@ -14,6 +15,7 @@ public final class ParserContext {
     @Getter
     private XmlReaderContext readerContext;
 
+    @Getter
     private BeanDefinitionParserDelegate delegate;
 
     public ParserContext(XmlReaderContext readerContext, BeanDefinitionParserDelegate delegate) {

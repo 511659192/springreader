@@ -48,6 +48,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
     @Nullable
     private TypeConverter typeConverter;
 
+    @Getter
     private BeanFactory parentBeanFactory;
 
     private Map<String, RootBeanDefinition> mergedBeanDefinitions = new ConcurrentHashMap<>(256);
@@ -91,10 +92,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
     @Override
     public <T> T getBean(String name, Class<T> classType) throws BeansException {
-        return doGetBean(name, classType);
+        return doGetBean(name, classType, null, false);
     }
 
-    private <T> T doGetBean(String name, Class<T> classType) {
+    public <T> T getBean(String name, @Nullable Class<T> requiredType, @Nullable Object... args) {
+        return doGetBean(name, requiredType, args, false);
+    }
+
+    private <T> T doGetBean(String name, Class<T> classType, @Nullable Object[] args, boolean typeCheckOnly) {
         String beanName = transformedBeanName(name);
         Object bean = null;
 
@@ -112,13 +117,16 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         return (T) bean;
     }
 
-    <T> T adaptBeanInstance(String name, Object bean, @Nullable Class<?> requiredType) {
-        if (requiredType == null || requiredType.isInstance(bean)) {
+    <T> T adaptBeanInstance(String name, Object bean, @Nullable Class<?> clazz) {
+        if (clazz == null || clazz.isInstance(bean)) {
             return (T) bean;
         }
 
         TypeConverter typeConverter = getTypeConverter();
-        Object convertedBean = typeConverter.convertIfNecessary(bean, requiredType);
+        Object convertedBean = typeConverter.convertIfNecessary(bean, clazz);
+        if (convertedBean == null) {
+            throw new RuntimeException("bean not fount" + name);
+        }
         return (T) convertedBean;
     }
 

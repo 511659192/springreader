@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.config.AbstractBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.support.BeanDefinitionDefaults;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -95,5 +96,22 @@ public class BeanDefinitionParserDelegate {
     }
 
     public void initDefault(Element root) {
+    }
+
+
+
+    public BeanDefinitionDefaults getBeanDefinitionDefaults() {
+        BeanDefinitionDefaults bdd = new BeanDefinitionDefaults();
+        //        bdd.setLazyInit(TRUE_VALUE.equalsIgnoreCase(this.defaults.getLazyInit()));
+        //        bdd.setAutowireMode(getAutowireMode(DEFAULT_VALUE));
+        //        bdd.setInitMethodName(this.defaults.getInitMethod());
+        //        bdd.setDestroyMethodName(this.defaults.getDestroyMethod());
+        return bdd;
+    }
+
+    public String[] getAutowireCandidatePatterns() {
+        //        String candidatePattern = this.defaults.getAutowireCandidates();
+        //        return (candidatePattern != null ? StringUtils.commaDelimitedListToStringArray(candidatePattern) : null);
+        return null;
     }
 }

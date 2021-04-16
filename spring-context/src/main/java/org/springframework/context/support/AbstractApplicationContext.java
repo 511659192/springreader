@@ -223,13 +223,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     }
 
     @Override
-    public <T> T getBean(Class<T> classType) throws BeansException {
-        return getBeanFactory().getBean(classType);
-    }
-
-    @Override
-    public <T> T getBean(String beanName, Class<T> classType) throws BeansException {
-        return getBeanFactory().getBean(beanName, classType);
+    public <T> T getBean(String beanName, Class<T> requiredType) throws BeansException {
+        return getBeanFactory().getBean(beanName, requiredType);
     }
 
     public ConfigurableEnvironment getEnvironment() {
@@ -263,6 +258,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     @Override
     public boolean isTypeMatch(String name, Class<?> typeToMatch) {
         return getBeanFactory().isTypeMatch(name, typeToMatch);
+    }
+
+    @Override
+    public <T> T getBean(Class<T> requiredType, Object... args) throws BeansException {
+        return getBeanFactory().getBean(requiredType, args);
     }
 
     @Override

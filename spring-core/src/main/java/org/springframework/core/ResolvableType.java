@@ -4,7 +4,10 @@ package org.springframework.core;
 
 import lombok.Getter;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * @author yangmeng
@@ -15,10 +18,21 @@ public class ResolvableType {
 
     @Getter
     private final Type type;
+    @Getter
     private Class<?> resolved;
 
-    public ResolvableType(Type type) {
-        this.type = type;
+    public ResolvableType(Class<?> clazz) {
+        this.type = clazz;
+        this.resolved = clazz == null ? Object.class : clazz;
+    }
+
+    public static ResolvableType forClass(Class<?> clazz) {
+        return new ResolvableType(clazz);
+    }
+
+    @Nullable
+    public Class<?> resolve() {
+        return this.resolved;
     }
 
     public static Class<?> resolve(ResolvableType targetType) {
@@ -41,5 +55,21 @@ public class ResolvableType {
 
     public boolean isAssignableFrom(Class<?> beanClass) {
         return resolved.isAssignableFrom(beanClass);
+    }
+
+    public boolean hasGenerics() {
+        return (getGenerics().length > 0);
+    }
+
+    public ResolvableType[] getGenerics() {
+        return new ResolvableType[0];
+    }
+
+    public Class<?> toClass() {
+        return resolve(Object.class);
+    }
+
+    public Class<?> resolve(Class<?> fallback) {
+        return (this.resolved != null ? this.resolved : fallback);
     }
 }
