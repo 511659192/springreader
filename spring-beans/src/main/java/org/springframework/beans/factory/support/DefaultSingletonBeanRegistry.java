@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
 
+import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -27,6 +29,10 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
     private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
 
     private final Set<String> registeredSingletons = new LinkedHashSet<>(256);
+
+    private final Map<String, Object> earlySingletonObjects = new ConcurrentHashMap<>(16);
+
+    private final Set<String> singletonsCurrentlyInCreation = Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
 
     @Override
@@ -53,6 +59,31 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 
         }
 
+        return singletonObject;
+    }
+
+    @Nullable
+    protected Object getSingleton(String beanName, boolean allowEarlyReference) {
+        Object singletonObject = this.singletonObjects.get(beanName);
+        if (singletonObject == null && !this.singletonsCurrentlyInCreation.contains(beanName)) {
+            singletonObject = this.earlySingletonObjects.get(beanName);
+            if (singletonObject == null && allowEarlyReference) {
+                synchronized (this.singletonObjects) {
+                    singletonObject = this.singletonObjects.get(beanName);
+                    if (singletonObject == null) {
+                        singletonObject = this.earlySingletonObjects.get(beanName);
+                        if (singletonObject == null) {
+                            ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
+                            if (singletonFactory != null) {
+                                singletonObject = singletonFactory.getObject();
+                                this.earlySingletonObjects.put(beanName, singletonObject);
+                                this.singletonFactories.remove(beanName);
+                            }
+                        }
+                    }
+                }
+            }
+        }
         return singletonObject;
     }
 

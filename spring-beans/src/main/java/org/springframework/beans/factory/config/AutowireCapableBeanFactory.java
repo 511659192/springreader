@@ -2,6 +2,7 @@
 // All rights reserved
 package org.springframework.beans.factory.config;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 
 /**
@@ -10,5 +11,4 @@ import org.springframework.beans.factory.BeanFactory;
  * @created 2021/3/23 3:29 下午
  **/
 public interface AutowireCapableBeanFactory extends BeanFactory {
-
 }

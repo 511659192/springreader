@@ -269,4 +269,19 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     public <T> Map<String, T> getBeansOfType(@Nullable Class<T> type) {
         return getBeanFactory().getBeansOfType(type);
     }
+
+    @Override
+    public Class<?> getType(String name, boolean allowFactoryBeanInit) {
+        return getBeanFactory().getType(name, allowFactoryBeanInit);
+    }
+
+    @Override
+    public Class<?> getType(String name) {
+        return getBeanFactory().getType(name);
+    }
+
+    @Override
+    public Object getBean(String name) {
+        return getBeanFactory().getBean(name);
+    }
 }

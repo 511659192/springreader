@@ -28,4 +28,6 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
     int getBeanPostProcessorCount();
 
     void setConversionService(@Nullable ConversionService conversionService);
+
+    boolean isFactoryBean(String name);
 }

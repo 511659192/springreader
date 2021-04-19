@@ -4,6 +4,7 @@ package org.springframework.core;
 
 import com.google.common.collect.ComparisonChain;
 
+import javax.annotation.Nullable;
 import java.util.Comparator;
 
 /**
@@ -15,5 +16,10 @@ public class OrderComparator implements Comparator<Object> {
     @Override
     public int compare(Object o1, Object o2) {
         return ComparisonChain.start().result();
+    }
+
+    @Nullable
+    public Integer getPriority(Object obj) {
+        return null;
     }
 }

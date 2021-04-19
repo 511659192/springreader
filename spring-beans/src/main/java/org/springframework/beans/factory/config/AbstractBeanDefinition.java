@@ -52,6 +52,10 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
     @Getter
     private Resource resource;
     private int role;
+    private boolean abstractFlag;
+    private Boolean lazyInit;
+    private boolean autowireCandidate;
+    private boolean primary = false;
 
     public AbstractBeanDefinition() {
     }
@@ -73,6 +77,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
         this.beanName = from.getBeanName();
     }
 
+    @Override
     public boolean isSingleton() {
         return Objects.equals(this.scope, "singleton");
     }
@@ -92,6 +97,13 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
         this.role = role;
     }
 
+
+    @Override
+    public boolean isAbstract() {
+        return this.abstractFlag;
+    }
+
+
     @Override
     public MutablePropertyValues getPropertyValues() {
         return Optional.ofNullable(this.propertyValues).orElseGet(() -> new MutablePropertyValues());
@@ -99,5 +111,23 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
     public void applyDefaults(BeanDefinitionDefaults definitionDefaults) {
 
+    }
+
+    public boolean hasBeanClass() {
+        return (this.beanClass instanceof Class);
+    }
+
+    @Override
+    public boolean isLazyInit() {
+        return (this.lazyInit != null && this.lazyInit.booleanValue());
+    }
+
+    @Override
+    public boolean isAutowireCandidate() {
+        return this.autowireCandidate;
+    }
+
+    public boolean isPrimary() {
+        return this.primary;
     }
 }

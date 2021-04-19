@@ -16,6 +16,7 @@ import org.springframework.beans.PropertyEditorRegistrySupport;
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -71,6 +72,48 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
     @Getter
     @Setter
     private ConversionService conversionService;
+
+    @Override
+    public Object getBean(String name) throws BeansException {
+        return doGetBean(name, null, null, false);
+    }
+
+    @Override
+    public boolean isFactoryBean(String name) {
+        String beanName = transformedBeanName(name);
+        Object beanInstance = getSingleton(beanName, false);
+        if (beanInstance instanceof FactoryBean) {
+            return true;
+        }
+
+        if (!containsBeanDefinition(beanName) && getParentBeanFactory() instanceof ConfigurableBeanFactory) {
+            return ((ConfigurableBeanFactory) getParentBeanFactory()).isFactoryBean(name);
+        }
+        RootBeanDefinition beanDefinition = getMergedLocalBeanDefinition(beanName);
+        return isFactoryBean(beanName, beanDefinition);
+    }
+
+    private boolean isFactoryBean(String beanName, RootBeanDefinition mbd) {
+        Boolean isFactoryBean = mbd.isFactoryBean;
+        if (isFactoryBean != null) {
+            return isFactoryBean;
+        }
+        Class<?> resolveBeanClass = predictBeanType( mbd);
+        boolean result = resolveBeanClass != null && FactoryBean.class.isAssignableFrom(resolveBeanClass);
+        mbd.isFactoryBean = result;
+        return result;
+    }
+
+
+    protected Class<?> predictBeanType(RootBeanDefinition mbd) {
+        Class<?> targetType = mbd.getTargetType();
+        if (targetType != null) {
+            return targetType;
+        }
+        Class<?> resolveBeanClass = resolveBeanClass(mbd);
+        return resolveBeanClass;
+    }
+
 
     public boolean isTypeMatch(String name, ResolvableType typeToMatch, boolean allowFactoryBeanInit) {
         String beanName = transformedBeanName(name);
@@ -164,7 +207,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
     protected abstract Object createBean(String beanName, RootBeanDefinition mbd, Object... args);
 
-    private String transformedBeanName(String name) {
+    protected String transformedBeanName(String name) {
         return name;
     }
 
@@ -281,6 +324,27 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         }
 
         return false;
+    }
+
+    @Override
+    @Nullable
+    public Class<?> getType(String name) {
+        return getType(name, true);
+    }
+
+    @Override
+    public Class<?> getType(String name, boolean allowFactoryBeanInit) {
+        String beanName = transformedBeanName(name);
+
+        Object beanInstance = getSingleton(beanName, false);
+        if (beanInstance != null && beanInstance.getClass() != NullBean.class) {
+            if (beanInstance instanceof FactoryBean && !name.startsWith("$")) {
+                return ((FactoryBean) beanInstance).getObjectType();
+            }
+            return beanInstance.getClass();
+        }
+
+        return null;
     }
 
     @Override

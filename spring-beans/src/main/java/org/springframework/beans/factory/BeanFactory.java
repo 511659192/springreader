@@ -18,4 +18,10 @@ public interface BeanFactory {
     boolean isTypeMatch(String name, Class<?> typeToMatch);
 
     boolean containsBean(String name);
+
+    Object getBean(String name);
+
+    Class<?> getType(String name);
+
+    Class<?> getType(String name, boolean allowFactoryBeanInit);
 }

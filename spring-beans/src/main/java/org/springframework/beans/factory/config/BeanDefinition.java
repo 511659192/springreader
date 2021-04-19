@@ -27,4 +27,14 @@ public interface BeanDefinition {
     void setRole(int role);
 
     Class<?> getBeanClass();
+
+    boolean isAbstract();
+
+    boolean isSingleton();
+    boolean isLazyInit();
+
+    boolean isAutowireCandidate();
+
+    boolean isPrimary();
+
 }

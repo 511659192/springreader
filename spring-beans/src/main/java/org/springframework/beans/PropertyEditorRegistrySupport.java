@@ -50,7 +50,6 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
         this.customEditors.put(requiredType, propertyEditor);
     }
 
-
     @Override
     @Nullable
     public PropertyEditor findCustomEditor(@Nullable Class<?> requiredType, @Nullable String propertyPath) {
@@ -66,7 +65,6 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
         if (editor != null) {
             return editor;
         }
-
 
         return null;
     }
