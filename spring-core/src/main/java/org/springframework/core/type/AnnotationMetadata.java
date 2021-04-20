@@ -2,7 +2,11 @@
 // All rights reserved
 package org.springframework.core.type;
 
+import org.springframework.core.annotation.MergedAnnotation;
+
+import java.lang.annotation.Annotation;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * @author yangmeng
@@ -20,5 +24,10 @@ public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata
 
     default boolean hasAnnotation(String annotationName) {
         return getAnnotations().isDirectlyPresent(annotationName);
+    }
+
+    default boolean hasMetaAnnotation(String metaAnnotationName) {
+        Predicate<MergedAnnotation<Annotation>> predicate = MergedAnnotation::isMetaPresent;
+        return getAnnotations().get(metaAnnotationName, predicate).isPresent();
     }
 }

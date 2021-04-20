@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * @author yangmeng
@@ -25,6 +26,12 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 
     boolean isDirectlyPresent(String annotationName);
 
+    <A extends Annotation> MergedAnnotation<A> get(String annotationType, @Nullable Predicate<? super MergedAnnotation<A>> predicate);
+
+
+    /**
+     * MergedAnnotationsCollection
+     */
     class MergedAnnotationsCollection implements MergedAnnotations {
 
         private final MergedAnnotation<?>[] annotations;
@@ -72,6 +79,65 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
         @Override
         public boolean isDirectlyPresent(String annotationName) {
             return isPresent(annotationName, true);
+        }
+
+        @Override
+        public <A extends Annotation> MergedAnnotation<A> get(String annotationType, @Nullable Predicate<? super MergedAnnotation<A>> predicate) {
+
+
+            MergedAnnotationSelector<MergedAnnotation<A>> selector = new MergedAnnotationSelector<MergedAnnotation<A>>() {
+                @Override
+                public MergedAnnotation<MergedAnnotation<A>> select(MergedAnnotation<MergedAnnotation<A>> existing, MergedAnnotation<MergedAnnotation<A>> candidate) {
+                    return null;
+                }
+            };
+
+
+            MergedAnnotationSelector<MergedAnnotation<A>> selector = new MergedAnnotationSelector<MergedAnnotation<A>>() {
+                @Override
+                public MergedAnnotation<MergedAnnotation<A>> select(MergedAnnotation<MergedAnnotation<A>> existing, MergedAnnotation<MergedAnnotation<A>> candidate) {
+                    return null;
+                }
+            };
+
+            MergedAnnotation result = null;
+
+
+            for (int i = 0; i < annotations.length; i++) {
+                MergedAnnotation<?> root = annotations[i];
+                AnnotationTypeMappings typeMappings = mappings[i];
+
+
+                for (int idx = 0; idx < typeMappings.size(); idx++) {
+                    AnnotationTypeMapping typeMapping = typeMappings.get(idx);
+                    if (!isMappingForType(typeMapping, annotationType)) {
+                        continue;
+                    }
+
+                    MergedAnnotation<A> candidate = null;
+                    if (idx == 0) {
+                        candidate = ((MergedAnnotation<A>) root);
+                    } else {
+                        candidate = TypeMappedAnnotation.createIfPossible(typeMapping, root);
+                    }
+
+                    if (candidate != null && (predicate != null || predicate.test(candidate))) {
+                        result = result == null ? candidate : selector.select(result, candidate);
+                    }
+                }
+
+            }
+
+
+            return result;
+        }
+
+        private static boolean isMappingForType(AnnotationTypeMapping mapping, @Nullable Object requiredType) {
+            if (requiredType == null) {
+                return true;
+            }
+            Class<? extends Annotation> actualType = mapping.getAnnotationType();
+            return (actualType == requiredType || actualType.getName().equals(requiredType));
         }
 
         @Override

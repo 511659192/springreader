@@ -10,4 +10,10 @@ import java.lang.annotation.Annotation;
  * @created 2021/4/4 23:05
  **/
 abstract class AbstractMergedAnnotation<T extends Annotation> implements MergedAnnotation<T> {
+
+
+    @Override
+    public boolean isMetaPresent() {
+        return isPresent() && getDistance() > 0;
+    }
 }

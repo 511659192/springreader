@@ -21,4 +21,12 @@ public interface MergedAnnotation<T extends Annotation> {
 
     @Nullable
     Object getSource();
+
+
+    boolean isMetaPresent();
+
+
+    boolean isPresent();
+
+    int getDistance();
 }

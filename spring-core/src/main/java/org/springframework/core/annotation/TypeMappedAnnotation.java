@@ -23,8 +23,11 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
     @Getter
     private final Object source;
     @Nullable
+    @Getter
     private final Object rootAttributes;
+    @Getter
     private final ValueExtractor valueExtractor;
+    @Getter
     private final int aggregateIndex;
 
     public TypeMappedAnnotation(AnnotationTypeMapping mapping, @Nullable ClassLoader classLoader, @Nullable Object source, @Nullable Object rootAttributes, ValueExtractor valueExtractor,
@@ -40,7 +43,8 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
     static <A extends Annotation> MergedAnnotation<A> of(@Nullable ClassLoader classLoader, @Nullable Object source, Class<A> annotationType, @Nullable Map<String, ?> attributes) {
         AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(annotationType);
         ValueExtractor valueExtractor = TypeMappedAnnotation::extractFromMap;
-        return new TypeMappedAnnotation<>(mappings.get(0), classLoader, source, attributes, valueExtractor, 0);
+        TypeMappedAnnotation<A> typeMappedAnnotation = new TypeMappedAnnotation<>(mappings.get(0), classLoader, source, attributes, valueExtractor, 0);
+        return typeMappedAnnotation;
     }
 
     @Nullable
@@ -48,8 +52,31 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
         return (map != null ? ((Map<String, ?>) map).get(attribute.getName()) : null);
     }
 
+    public static <A extends Annotation> MergedAnnotation<A> createIfPossible(AnnotationTypeMapping typeMapping, MergedAnnotation<?> annotation) {
+        if (annotation instanceof TypeMappedAnnotation) {
+            TypeMappedAnnotation<?> root = (TypeMappedAnnotation<?>) annotation;
+            return createIfPossible(typeMapping, root.source, root.rootAttributes, root.valueExtractor, root.aggregateIndex);
+        }
+
+        return null;
+    }
+
+    private static <A extends Annotation> MergedAnnotation<A> createIfPossible(AnnotationTypeMapping typeMapping, Object source, Object rootAttributes, ValueExtractor valueExtractor, int aggregateIndex) {
+        return new TypeMappedAnnotation<>(typeMapping, null, source, rootAttributes, valueExtractor, aggregateIndex);
+    }
+
     @Override
     public Class<A> getType() {
         return (Class<A>) this.mapping.getAnnotationType();
+    }
+
+    @Override
+    public boolean isPresent() {
+        return true;
+    }
+
+    @Override
+    public int getDistance() {
+        return this.mapping.getDistance();
     }
 }

@@ -8,15 +8,17 @@ import com.google.common.collect.Sets;
 import java.lang.annotation.Annotation;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * @author Administrator
  * @version 1.0
  * @created 2021/4/4 23:07
  **/
-public class AnnotationTypeMappings {
+public class AnnotationTypeMappings implements Iterable<AnnotationTypeMapping> {
     private final List<AnnotationTypeMapping> typeMappings = Lists.newArrayList();
 
     final Set<String> ignores = Sets.newHashSet("java.lang", "org.springframework.lang");
@@ -32,14 +34,14 @@ public class AnnotationTypeMappings {
         }
     }
 
-    private void addMetaAnnotationsToQueue(Deque<AnnotationTypeMapping> queue, AnnotationTypeMapping mapping) {
-        final Class<? extends Annotation> annotationType = mapping.getAnnotationType();
+    private void addMetaAnnotationsToQueue(Deque<AnnotationTypeMapping> queue, AnnotationTypeMapping workingMapping) {
+        final Class<? extends Annotation> annotationType = workingMapping.getAnnotationType();
         final Annotation[] declaredAnnotations = annotationType.getDeclaredAnnotations();
         for (Annotation annotation : declaredAnnotations) {
             if (ignores.stream().filter(ignore -> annotation.annotationType().getName().startsWith(ignore)).findAny().isPresent()) {
                 continue;
             }
-            queue.addLast(new AnnotationTypeMapping(null, annotation.annotationType(), annotation));
+            queue.addLast(new AnnotationTypeMapping(workingMapping, annotation.annotationType(), annotation));
         }
     }
 
@@ -53,5 +55,10 @@ public class AnnotationTypeMappings {
 
     int size() {
         return this.typeMappings.size();
+    }
+
+    @Override
+    public Iterator<AnnotationTypeMapping> iterator() {
+        return this.typeMappings.iterator();
     }
 }

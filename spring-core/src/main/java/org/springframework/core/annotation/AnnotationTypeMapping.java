@@ -6,7 +6,7 @@ import lombok.Getter;
 
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
-import java.util.Optional;
+import java.util.StringJoiner;
 
 /**
  * @author Administrator
@@ -16,7 +16,9 @@ import java.util.Optional;
 public class AnnotationTypeMapping {
 
     @Nullable
-    private final AnnotationTypeMapping source;
+    private final AnnotationTypeMapping parentMapping;
+
+    private final AnnotationTypeMapping root;
 
     @Getter
     private final int distance;
@@ -27,11 +29,22 @@ public class AnnotationTypeMapping {
     @Nullable
     private final Annotation annotation;
 
-    public <A extends Annotation> AnnotationTypeMapping(@Nullable AnnotationTypeMapping source,
+    public <A extends Annotation> AnnotationTypeMapping(@Nullable AnnotationTypeMapping parentMapping,
             Class<? extends Annotation> annotationType, @Nullable Annotation annotation) {
-        this.source = source;
+        this.parentMapping = parentMapping;
+        this.root = (parentMapping != null ? parentMapping.getRoot() : this);
         this.annotationType = annotationType;
         this.annotation = annotation;
-        this.distance = source == null ? 0 : source.distance + 1;
+        this.distance = parentMapping == null ? 0 : parentMapping.distance + 1;
+    }
+
+    AnnotationTypeMapping getRoot() {
+        return this.root;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", AnnotationTypeMapping.class.getSimpleName() + "[", "]").add("distance=" + distance).add("annotationType=" + annotationType).add(
+                "annotation=" + annotation).toString();
     }
 }

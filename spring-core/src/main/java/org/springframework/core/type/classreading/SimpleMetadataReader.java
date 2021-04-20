@@ -21,6 +21,8 @@ import java.util.StringJoiner;
 @Slf4j
 public class SimpleMetadataReader implements MetadataReader {
 
+    private static final int PARSING_OPTIONS = ClassReader.SKIP_DEBUG | ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES;
+
     @Getter
     Resource resource;
 
@@ -34,7 +36,7 @@ public class SimpleMetadataReader implements MetadataReader {
 
         SimpleAnnotationMetadataReadingVisitor visitor = new SimpleAnnotationMetadataReadingVisitor(classLoader);
         ClassReader classReader = getClassReader(resource);
-        classReader.accept(visitor, ClassReader.SKIP_DEBUG);
+        classReader.accept(visitor, PARSING_OPTIONS);
         this.resource = resource;
         this.annotationMetadata = visitor.getMetadata();
 

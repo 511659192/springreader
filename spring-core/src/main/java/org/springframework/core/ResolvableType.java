@@ -44,7 +44,7 @@ public class ResolvableType {
 
             @Override
             public boolean isAssignableFrom(Class<?> beanClass) {
-                return beanClass == null || clazz.isAssignableFrom(beanClass);
+                return beanClass == null || getResolved().isAssignableFrom(beanClass);
             }
         };
     }

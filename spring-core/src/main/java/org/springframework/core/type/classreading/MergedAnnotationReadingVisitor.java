@@ -7,6 +7,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.SpringAsmInfo;
 
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
@@ -32,7 +33,7 @@ public class MergedAnnotationReadingVisitor<T extends Annotation> extends Annota
     public MergedAnnotationReadingVisitor(@Nullable ClassLoader classLoader, @Nullable Object source,
             Class<T> annotationType, Consumer<MergedAnnotation<T>> consumer) {
 
-        super(Opcodes.ASM5);
+        super(SpringAsmInfo.ASM_VERSION);
         this.classLoader = classLoader;
         this.source = source;
         this.annotationType = annotationType;
