@@ -3,10 +3,8 @@
 package com.users.service;
 
 import lombok.Data;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.StringJoiner;
 
 /**
  * @author yangmeng
@@ -17,14 +15,10 @@ import java.util.StringJoiner;
 @Data
 public class DemoService {
 
-    private String name;
+    @Autowired
+    private DemoDao demoDao;
 
     public String hello() {
-        return "world";
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", DemoService.class.getSimpleName() + "[", "]").add("name='" + name + "'").toString();
+        return demoDao.query();
     }
 }

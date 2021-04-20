@@ -30,4 +30,6 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
     void setConversionService(@Nullable ConversionService conversionService);
 
     boolean isFactoryBean(String name);
+
+    BeanDefinition getMergedBeanDefinition(String beanName);
 }

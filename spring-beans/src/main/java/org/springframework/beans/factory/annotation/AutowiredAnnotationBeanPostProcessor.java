@@ -9,6 +9,8 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 
+import java.lang.reflect.Constructor;
+
 /**
  * @author yangmeng
  * @version 1.0
@@ -26,5 +28,10 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
     @Override
     public int getOrder() {
         return this.order;
+    }
+
+    @Override
+    public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, String beanName) {
+        return new Constructor[0];
     }
 }

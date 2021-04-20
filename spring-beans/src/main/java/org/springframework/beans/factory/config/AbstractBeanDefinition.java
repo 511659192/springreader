@@ -3,16 +3,23 @@
 package org.springframework.beans.factory.config;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanMetadataAttributeAccessor;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.BeanDefinitionDefaults;
 import org.springframework.core.io.Resource;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.Constructor;
 import java.util.Objects;
 import java.util.Optional;
+
+import static org.springframework.beans.factory.config.AutowireCapableBeanFactory.AUTOWIRE_AUTODETECT;
+import static org.springframework.beans.factory.config.AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE;
+import static org.springframework.beans.factory.config.AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR;
+import static org.springframework.beans.factory.config.AutowireCapableBeanFactory.AUTOWIRE_NO;
+
 
 /**
  * @author yangmeng
@@ -29,15 +36,18 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
     private String scope = SCOPE_SINGLETON;
 
     @Getter
+    @Setter
     private volatile Class<?> beanClass;
 
+    @Setter
     private String beanClassName;
 
     private String factoryBeanName;
 
     private String factoryMethodName;
 
-    private String autowireMode;
+    @Setter
+    private int autowireMode = AUTOWIRE_NO;
 
     private String initMethodName;
 
@@ -53,9 +63,14 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
     private Resource resource;
     private int role;
     private boolean abstractFlag;
+
+    @Setter
     private Boolean lazyInit;
     private boolean autowireCandidate;
     private boolean primary = false;
+
+    @Nullable
+    private ConstructorArgumentValues constructorArgumentValues;
 
     public AbstractBeanDefinition() {
     }
@@ -129,5 +144,47 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
     public boolean isPrimary() {
         return this.primary;
+    }
+
+    public void overrideFrom(BeanDefinition other) {
+        setLazyInit(other.isLazyInit());
+
+        if (StringUtils.isNotBlank(other.getBeanClassName())) {
+            setBeanClassName(other.getBeanClassName());
+        }
+
+        // todo  other
+    }
+
+    public void prepareMethodOverrides() {
+
+    }
+
+    public int getResolvedAutowireMode() {
+        if (this.autowireMode == AUTOWIRE_AUTODETECT) {
+            // Work out whether to apply setter autowiring or constructor autowiring.
+            // If it has a no-arg constructor it's deemed to be setter autowiring,
+            // otherwise we'll try constructor autowiring.
+            Constructor<?>[] constructors = getBeanClass().getConstructors();
+            for (Constructor<?> constructor : constructors) {
+                if (constructor.getParameterCount() == 0) {
+                    return AUTOWIRE_BY_TYPE;
+                }
+            }
+            return AUTOWIRE_CONSTRUCTOR;
+        }
+        else {
+            return this.autowireMode;
+        }
+    }
+
+    @Override
+    public boolean hasConstructorArgumentValues() {
+        return (this.constructorArgumentValues != null && !this.constructorArgumentValues.isEmpty());
+    }
+
+    @Nullable
+    public ConstructorArgumentValues getConstructorArgumentValues() {
+        return Optional.of(this.constructorArgumentValues).orElseGet(() -> new ConstructorArgumentValues());
     }
 }

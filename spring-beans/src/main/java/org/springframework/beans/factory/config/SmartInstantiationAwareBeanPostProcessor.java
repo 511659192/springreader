@@ -2,6 +2,11 @@
 // All rights reserved
 package org.springframework.beans.factory.config;
 
+import org.springframework.beans.BeansException;
+
+import javax.annotation.Nullable;
+import java.lang.reflect.Constructor;
+
 /**
  * @author yangmeng
  * @version 1.0
@@ -10,5 +15,14 @@ package org.springframework.beans.factory.config;
 public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationAwareBeanPostProcessor {
 
 
+    default Object getEarlyBeanReference(Object bean, String beanName) {
+        return bean;
+    }
 
+    @Nullable
+    default Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, String beanName)
+            throws BeansException {
+
+        return null;
+    }
 }

@@ -2,8 +2,6 @@
 // All rights reserved
 package org.springframework.beans.factory.config;
 
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-
 /**
  * @author yangmeng
  * @version 1.0

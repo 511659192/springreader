@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Consumer;
@@ -26,8 +27,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 
     boolean isDirectlyPresent(String annotationName);
 
-    <A extends Annotation> MergedAnnotation<A> get(String annotationType, @Nullable Predicate<? super MergedAnnotation<A>> predicate);
-
+    <A extends Annotation> Optional<MergedAnnotation<A>> get(String annotationType, @Nullable Predicate<? super MergedAnnotation<A>> predicate);
 
     /**
      * MergedAnnotationsCollection
@@ -82,26 +82,10 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
         }
 
         @Override
-        public <A extends Annotation> MergedAnnotation<A> get(String annotationType, @Nullable Predicate<? super MergedAnnotation<A>> predicate) {
+        public <A extends Annotation> Optional<MergedAnnotation<A>> get(String annotationType, @Nullable Predicate<? super MergedAnnotation<A>> predicate) {
 
-
-            MergedAnnotationSelector<MergedAnnotation<A>> selector = new MergedAnnotationSelector<MergedAnnotation<A>>() {
-                @Override
-                public MergedAnnotation<MergedAnnotation<A>> select(MergedAnnotation<MergedAnnotation<A>> existing, MergedAnnotation<MergedAnnotation<A>> candidate) {
-                    return null;
-                }
-            };
-
-
-            MergedAnnotationSelector<MergedAnnotation<A>> selector = new MergedAnnotationSelector<MergedAnnotation<A>>() {
-                @Override
-                public MergedAnnotation<MergedAnnotation<A>> select(MergedAnnotation<MergedAnnotation<A>> existing, MergedAnnotation<MergedAnnotation<A>> candidate) {
-                    return null;
-                }
-            };
-
+            MergedAnnotationSelector<A> selector = (existing, candidate) -> (existing.getDistance() < candidate.getDistance()) ? existing : candidate;
             MergedAnnotation result = null;
-
 
             for (int i = 0; i < annotations.length; i++) {
                 MergedAnnotation<?> root = annotations[i];
@@ -114,7 +98,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
                         continue;
                     }
 
-                    MergedAnnotation<A> candidate = null;
+                    MergedAnnotation<A> candidate;
                     if (idx == 0) {
                         candidate = ((MergedAnnotation<A>) root);
                     } else {
@@ -122,14 +106,12 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
                     }
 
                     if (candidate != null && (predicate != null || predicate.test(candidate))) {
-                        result = result == null ? candidate : selector.select(result, candidate);
+                        result = (result == null) ? candidate : selector.select(result, candidate);
                     }
                 }
-
             }
 
-
-            return result;
+            return Optional.ofNullable(result);
         }
 
         private static boolean isMappingForType(AnnotationTypeMapping mapping, @Nullable Object requiredType) {

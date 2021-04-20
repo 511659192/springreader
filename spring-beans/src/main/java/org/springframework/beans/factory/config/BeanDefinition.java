@@ -4,6 +4,8 @@ package org.springframework.beans.factory.config;
 
 import org.springframework.beans.MutablePropertyValues;
 
+import javax.annotation.Nullable;
+
 /**
  * @author yangmeng
  * @version 1.0
@@ -36,5 +38,19 @@ public interface BeanDefinition {
     boolean isAutowireCandidate();
 
     boolean isPrimary();
+
+
+    @Nullable
+    default String getParentName() {
+        return null;
+    }
+
+    default boolean hasConstructorArgumentValues() {
+        return !getConstructorArgumentValues().isEmpty();
+    }
+
+    default ConstructorArgumentValues getConstructorArgumentValues() {
+        return null;
+    }
 
 }

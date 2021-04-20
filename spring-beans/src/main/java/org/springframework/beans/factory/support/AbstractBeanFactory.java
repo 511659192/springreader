@@ -144,20 +144,20 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
     private <T> T doGetBean(String name, Class<T> classType, @Nullable Object[] args, boolean typeCheckOnly) {
         String beanName = transformedBeanName(name);
-        Object bean = null;
 
         Object sharedInstance = getSingleton(beanName);
-        if (sharedInstance != null) {
-        } else {
+        if (sharedInstance == null || args != null) {
             RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
             if (mbd.isSingleton()) {
                 sharedInstance = getSingleton(beanName, () -> createBean(beanName, mbd));
+            } else {
+                // todo not support
             }
         }
 
-        bean = getObjectForBeanInstance(sharedInstance, name, beanName, null);
-
-        return (T) bean;
+        Object beanInstance = getObjectForBeanInstance(sharedInstance, name, beanName, null);
+        T adaptBeanInstance = adaptBeanInstance(name, beanInstance, classType);
+        return adaptBeanInstance;
     }
 
     <T> T adaptBeanInstance(String name, Object bean, @Nullable Class<?> clazz) {
@@ -223,17 +223,41 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         }
 
         BeanDefinition beanDefinition = getBeanDefinition(beanName);
-        return getMergedBeanDefinition(beanName, beanDefinition);
+        return getMergedBeanDefinition(beanName, beanDefinition, null);
     }
 
-    private RootBeanDefinition getMergedBeanDefinition(String beanName, BeanDefinition beanDefinition) {
+    private RootBeanDefinition getMergedBeanDefinition(String beanName, BeanDefinition beanDefinition, @Nullable BeanDefinition containingBd) {
         synchronized (this.mergedBeanDefinitions) {
-            RootBeanDefinition mdb = this.mergedBeanDefinitions.get(beanName);
-            if (mdb == null) {
-                mdb = new RootBeanDefinition(beanDefinition);
-                this.mergedBeanDefinitions.put(beanName, mdb);
+            RootBeanDefinition mbd = null;
+
+            mbd = this.mergedBeanDefinitions.get(beanName);
+            if (mbd == null || mbd.stale) {
+                if (beanDefinition.getParentName() == null) {
+                    if (beanDefinition instanceof RootBeanDefinition) {
+                        mbd = ((RootBeanDefinition) beanDefinition).cloneBeanDefinition();
+                    } else {
+                        mbd = new RootBeanDefinition(beanDefinition);
+                    }
+                } else {
+                    BeanDefinition parentBeanDefinition;
+                    String parentBeanName = transformedBeanName(beanDefinition.getParentName());
+                    if (!beanName.equals(parentBeanName)) {
+                        parentBeanDefinition = getMergedLocalBeanDefinition(parentBeanName);
+                    } else {
+                        BeanFactory parentBeanFactory = getParentBeanFactory();
+                        if (parentBeanFactory instanceof ConfigurableBeanFactory) {
+                            parentBeanDefinition = ((ConfigurableBeanFactory) parentBeanFactory).getMergedBeanDefinition(parentBeanName);
+                        } else {
+                            throw new RuntimeException("not support");
+                        }
+                    }
+
+                    mbd = new RootBeanDefinition(parentBeanDefinition);
+                    mbd.overrideFrom(beanDefinition);
+                }
             }
-            return mdb;
+
+            return mbd;
         }
     }
 
@@ -354,6 +378,18 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
     public abstract boolean containsBeanDefinition(String className);
 
+
+    @Override
+    public BeanDefinition getMergedBeanDefinition(String beanName) {
+        beanName = transformedBeanName(beanName);
+
+        if (!containsBeanDefinition(beanName) && getParentBeanFactory() instanceof ConfigurableBeanFactory) {
+            return ((ConfigurableBeanFactory) getParentBeanFactory()).getMergedBeanDefinition(beanName);
+        }
+
+        return getMergedLocalBeanDefinition(beanName);
+    }
+
     /**
      * Internal cache of pre-filtered post-processors.
      *
@@ -371,4 +407,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
     private class BeanPostProcessorCacheAwareList extends CopyOnWriteArrayList<BeanPostProcessor> {
 
     }
+
+
+    protected void registerDisposableBeanIfNecessary(String beanName, Object bean, RootBeanDefinition mbd) {
+
+    }
+
 }
