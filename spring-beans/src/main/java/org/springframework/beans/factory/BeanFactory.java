@@ -3,6 +3,7 @@
 package org.springframework.beans.factory;
 
 import org.springframework.beans.BeansException;
+import org.springframework.core.ResolvableType;
 
 /**
  * @author yangmeng
@@ -16,6 +17,10 @@ public interface BeanFactory {
     <T> T getBean(String beanName, Class<T> classType) throws BeansException;
 
     boolean isTypeMatch(String name, Class<?> typeToMatch);
+
+    default boolean isTypeMatch(String name, ResolvableType typeToMatch) {
+        return isTypeMatch(name, typeToMatch.resolve());
+    }
 
     boolean containsBean(String name);
 

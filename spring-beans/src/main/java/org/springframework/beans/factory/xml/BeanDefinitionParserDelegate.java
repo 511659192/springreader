@@ -23,6 +23,11 @@ import java.util.Objects;
 @Slf4j
 public class BeanDefinitionParserDelegate {
 
+    public static final String AUTOWIRE_NO_VALUE = "no";
+    public static final String AUTOWIRE_BY_NAME_VALUE = "byName";
+    public static final String AUTOWIRE_BY_TYPE_VALUE = "byType";
+    public static final String AUTOWIRE_CONSTRUCTOR_VALUE = "constructor";
+
     final XmlReaderContext readerContext;
 
     public BeanDefinitionParserDelegate(XmlReaderContext readerContext) {
@@ -83,9 +88,35 @@ public class BeanDefinitionParserDelegate {
 
     private AbstractBeanDefinition parseBeanDefinitionAttributes(Element element, String beanName, AbstractBeanDefinition beanDefinition) {
         beanDefinition.setScope(element.getAttribute("scope"));
-        beanDefinition.setAutowireMode(element.getAttribute("autowire"));
+
+
+        String autowire = element.getAttribute("autowire");
+        beanDefinition.setAutowireMode(getAutowireMode(autowire));
         beanDefinition.setInitMethodName(element.getAttribute("init-method"));
         return beanDefinition;
+    }
+
+    public int getAutowireMode(String attrValue) {
+        String attr = attrValue;
+        if (isDefaultValue(attr)) {
+            attr = AUTOWIRE_BY_TYPE_VALUE;
+        }
+        int autowire = AbstractBeanDefinition.AUTOWIRE_NO;
+        if (AUTOWIRE_BY_NAME_VALUE.equals(attr)) {
+            autowire = AbstractBeanDefinition.AUTOWIRE_BY_NAME;
+        }
+        else if (AUTOWIRE_BY_TYPE_VALUE.equals(attr)) {
+            autowire = AbstractBeanDefinition.AUTOWIRE_BY_TYPE;
+        }
+        else if (AUTOWIRE_CONSTRUCTOR_VALUE.equals(attr)) {
+            autowire = AbstractBeanDefinition.AUTOWIRE_CONSTRUCTOR;
+        }
+        // Else leave default value.
+        return autowire;
+    }
+
+    private boolean isDefaultValue(String value) {
+        return StringUtils.isNotBlank(value) || "".equals(value);
     }
 
     private AbstractBeanDefinition createBeanDefinition(String className, String beanName) {

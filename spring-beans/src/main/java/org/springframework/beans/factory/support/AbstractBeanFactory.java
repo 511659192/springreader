@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
@@ -18,6 +19,7 @@ import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
@@ -122,9 +124,38 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
             return typeToMatch.isInstance(beanInstance);
         }
 
-        RootBeanDefinition rootBeanDefinition = getMergedLocalBeanDefinition(beanName);
-        Class<?> beanClass = rootBeanDefinition.getBeanClass();
-        return typeToMatch.isAssignableFrom(beanClass);
+        BeanFactory parentBeanFactory = getParentBeanFactory();
+        if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
+            return parentBeanFactory.isTypeMatch(name, typeToMatch);
+        }
+
+        RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+        Class<?> classToMatch = typeToMatch.resolve();
+        Class<?>[] typesToMatch = new Class[]{FactoryBean.class, classToMatch};
+
+        Class<?> predictedType = predictBeanType(beanName, mbd, typesToMatch);
+        return typeToMatch.isAssignableFrom(predictedType);
+    }
+
+    private Class<?> predictBeanType(String beanName, RootBeanDefinition mbd, Class<?>[] typesToMatch) {
+
+        Class<?> targetType = mbd.getTargetType();
+        if (targetType != null) {
+            return targetType;
+        }
+
+        if (StringUtils.isNotBlank(mbd.getFactoryMethodName())) {
+            return null;
+        }
+        return resolveBeanClass(mbd, beanName, typesToMatch);
+    }
+
+    private Class<?> resolveBeanClass(RootBeanDefinition mbd, String beanName, Class<?>... typesToMatch) {
+        if (mbd.hasBeanClass()) {
+            return mbd.getBeanClass();
+        }
+
+        return doResolveBeanClass(mbd, typesToMatch);
     }
 
     @Override
@@ -200,7 +231,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         return doResolveBeanClass(mbd);
     }
 
-    private Class<?> doResolveBeanClass(RootBeanDefinition mbd) {
+    private Class<?> doResolveBeanClass(RootBeanDefinition mbd, Class<?>... typesToMatch) {
         ClassLoader beanClassLoader = getBeanClassLoader();
         return mbd.resolveBeanClass(beanClassLoader);
     }

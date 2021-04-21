@@ -4,6 +4,7 @@ package org.springframework.beans.factory.support;
 
 import org.springframework.beans.factory.config.AbstractBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.core.ResolvableType;
 
 import javax.annotation.Nullable;
@@ -17,6 +18,9 @@ import java.util.StringJoiner;
  * @created 2021/3/24 5:34 下午
  **/
 public class RootBeanDefinition extends AbstractBeanDefinition {
+
+    @Nullable
+    private BeanDefinitionHolder decoratedDefinition;
 
     volatile Boolean beforeInstantiationResolved = Boolean.TRUE;
 
@@ -82,5 +86,10 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
     @Nullable
     public Constructor<?>[] getPreferredConstructors() {
         return null;
+    }
+
+    @Nullable
+    public BeanDefinitionHolder getDecoratedDefinition() {
+        return this.decoratedDefinition;
     }
 }

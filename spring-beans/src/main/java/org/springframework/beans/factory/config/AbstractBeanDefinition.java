@@ -34,6 +34,12 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
     String SCOPE_SINGLETON = ConfigurableBeanFactory.SCOPE_SINGLETON;
     String SCOPE_PROTOTYPE = ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
+    public static final int AUTOWIRE_NO = AutowireCapableBeanFactory.AUTOWIRE_NO;
+    public static final int AUTOWIRE_BY_NAME = AutowireCapableBeanFactory.AUTOWIRE_BY_NAME;
+    public static final int AUTOWIRE_BY_TYPE = AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE;
+    public static final int AUTOWIRE_CONSTRUCTOR = AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR;
+
+
     private String scope = SCOPE_SINGLETON;
 
     @Getter
