@@ -4,6 +4,9 @@ package org.springframework.core.annotation;
 
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Inherited;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.AnnotatedElement;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
@@ -18,6 +21,32 @@ import java.util.function.Predicate;
  * @created 2021/4/6 3:36 下午
  **/
 public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>> {
+    enum SearchStrategy {
+
+        /**
+         * Find only directly declared annotations, without considering
+         * {@link Inherited @Inherited} annotations and without searching
+         * superclasses or implemented interfaces.
+         */
+        DIRECT,
+    }
+    <A extends Annotation> MergedAnnotation<A> get(Class<A> annotationType);
+
+    static MergedAnnotations from(AnnotatedElement element) {
+        return from(element, SearchStrategy.DIRECT);
+    }
+
+    static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy) {
+        return from(element, searchStrategy, RepeatableContainers.standardRepeatables());
+    }
+
+    static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy, RepeatableContainers repeatableContainers) {
+        return from(element, searchStrategy, repeatableContainers, AnnotationFilter.PLAIN);
+    }
+
+    static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy, RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
+        return TypeMappedAnnotations.from(element, searchStrategy, repeatableContainers, annotationFilter);
+    }
 
     boolean isPresent(String annotationType);
 
@@ -65,6 +94,11 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
                 }
             }
             return false;
+        }
+
+        @Override
+        public <A extends Annotation> MergedAnnotation<A> get(Class<A> annotationType) {
+            return null;
         }
 
         @Override

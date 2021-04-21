@@ -3,13 +3,21 @@
 package org.springframework.util;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Administrator
@@ -79,5 +87,40 @@ public abstract class ClassUtils {
 
     public static boolean isAssignable(Class<?> a, Class<?> b) {
         return a.isAssignableFrom(b) || b.isAssignableFrom(a);
+    }
+
+    public static Method[] getDeclaredMethods(Class<?> beanClass) {
+        Class<?>[] interfaces = beanClass.getInterfaces();
+        Method[] ifcDefaultMethods = Arrays.stream(interfaces).flatMap(ifc -> {
+            Method[] methods1 = ifc.getMethods();
+            return Arrays.stream(methods1).filter(ifcMethod -> !Modifier.isAbstract(ifcMethod.getModifiers()));
+        }).toArray(Method[]::new);
+
+        Method[] declaredMethods = beanClass.getDeclaredMethods();
+
+        Method[] result = new Method[declaredMethods.length + ifcDefaultMethods.length];
+
+        System.arraycopy(declaredMethods, 0, result, 0, declaredMethods.length);
+        System.arraycopy(ifcDefaultMethods, declaredMethods.length, result, declaredMethods.length, ifcDefaultMethods.length);
+        return result;
+    }
+
+    public static Class<?> getUserClass(Class<?> clazz) {
+        if (clazz.getName().contains("$$")) {
+            Class<?> superclass = clazz.getSuperclass();
+            if (superclass != null && superclass != Object.class) {
+                return superclass;
+            }
+        }
+        return clazz;
+    }
+
+    public static <T> Constructor<T> getUserClassConstructors(Class<T> userClass, Class... paramTypes) {
+        try {
+            Constructor<T> declaredConstructor = userClass.getDeclaredConstructor(paramTypes);
+            return declaredConstructor;
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

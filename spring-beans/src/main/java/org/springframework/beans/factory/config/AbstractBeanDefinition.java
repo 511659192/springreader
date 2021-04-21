@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanMetadataAttributeAccessor;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.BeanDefinitionDefaults;
+import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.core.io.Resource;
 
 import javax.annotation.Nullable;
@@ -71,6 +72,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
     @Nullable
     private ConstructorArgumentValues constructorArgumentValues;
+
+    @Getter
+    private MethodOverrides methodOverrides = new MethodOverrides();
 
     public AbstractBeanDefinition() {
     }
@@ -187,4 +191,5 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
     public ConstructorArgumentValues getConstructorArgumentValues() {
         return Optional.of(this.constructorArgumentValues).orElseGet(() -> new ConstructorArgumentValues());
     }
+
 }

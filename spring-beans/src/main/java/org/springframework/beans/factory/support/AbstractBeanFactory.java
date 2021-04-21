@@ -228,9 +228,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
     private RootBeanDefinition getMergedBeanDefinition(String beanName, BeanDefinition beanDefinition, @Nullable BeanDefinition containingBd) {
         synchronized (this.mergedBeanDefinitions) {
-            RootBeanDefinition mbd = null;
-
-            mbd = this.mergedBeanDefinitions.get(beanName);
+            RootBeanDefinition mbd = this.mergedBeanDefinitions.get(beanName);
             if (mbd == null || mbd.stale) {
                 if (beanDefinition.getParentName() == null) {
                     if (beanDefinition instanceof RootBeanDefinition) {

@@ -17,4 +17,23 @@ public interface MergedAnnotationSelector<A extends Annotation> {
     }
 
     MergedAnnotation<A> select(MergedAnnotation<A> existing, MergedAnnotation<A> candidate);
+
+
+    abstract class MergedAnnotationSelectors {
+
+        private static final MergedAnnotationSelector<?> NEAREST = new MergedAnnotationSelector<Annotation>(){
+
+            @Override
+            public MergedAnnotation<Annotation> select(MergedAnnotation<Annotation> existing, MergedAnnotation<Annotation> candidate) {
+                return null;
+            }
+        };
+
+
+        public static <A extends Annotation> MergedAnnotationSelector<A> nearest() {
+            return (MergedAnnotationSelector<A>) NEAREST;
+        }
+
+    }
+
 }

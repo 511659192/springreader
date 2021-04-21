@@ -1,20 +1,18 @@
+// Copyright (C) 2021 Meituan
+// All rights reserved
 package org.springframework.beans.factory.annotation;
 
-import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 说明
- * Created by yangmeng on 2021/4/7.
- */
-
-@Target(ElementType.METHOD)
+ * @author yangmeng
+ * @version 1.0
+ * @created 2021/4/20 4:10 下午
+ **/
 @Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface Lookup {
-
-    String value() default "";
+@Target({ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD, ElementType.ANNOTATION_TYPE})
+public @interface Value {
 }

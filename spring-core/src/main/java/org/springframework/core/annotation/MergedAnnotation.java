@@ -29,4 +29,39 @@ public interface MergedAnnotation<T extends Annotation> {
     boolean isPresent();
 
     int getDistance();
+
+
+    MergedAnnotation MISSING = MissingMergedAnnotation.INSTANCE;
+
+    final class MissingMergedAnnotation<A extends Annotation> implements MergedAnnotation<A> {
+
+        private static final MergedAnnotation<?> INSTANCE = new MissingMergedAnnotation<>();
+
+        @Override
+        public Class<A> getType() {
+            return null;
+        }
+
+        @Nullable
+        @Override
+        public Object getSource() {
+            return null;
+        }
+
+        @Override
+        public boolean isMetaPresent() {
+            return false;
+        }
+
+        @Override
+        public boolean isPresent() {
+            return false;
+        }
+
+        @Override
+        public int getDistance() {
+            return -1;
+        }
+    }
+
 }
