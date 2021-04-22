@@ -12,7 +12,7 @@ import org.springframework.core.ResolvableType;
  **/
 public interface BeanFactory {
 
-    <T> T getBean(Class<T> classType, Object... args) throws BeansException;
+    <T> T getBean(Class<T> classType, Object[] args) throws BeansException;
 
     <T> T getBean(String beanName, Class<T> classType) throws BeansException;
 

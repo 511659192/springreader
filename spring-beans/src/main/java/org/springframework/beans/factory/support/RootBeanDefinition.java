@@ -2,6 +2,7 @@
 // All rights reserved
 package org.springframework.beans.factory.support;
 
+import lombok.Getter;
 import org.springframework.beans.factory.config.AbstractBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -35,6 +36,12 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
     Executable resolvedConstructorOrFactoryMethod;
 
     boolean constructorArgumentsResolved = false;
+
+    @Nullable
+    Object[] resolvedConstructorArguments;
+
+    @Nullable
+    Object[] preparedConstructorArguments;
 
 
     boolean postProcessed = false;

@@ -23,7 +23,7 @@ public class ClassPathXmlApplicationContextTest {
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");
         int beanDefinitionCount = context.getBeanDefinitionCount();
         log.info("cnt: {}", beanDefinitionCount);
-        DemoService bean = context.getBean(DemoService.class);
+        DemoService bean = context.getBean(DemoService.class, null);
         log.info(bean.hello());
     }
 }

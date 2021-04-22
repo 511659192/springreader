@@ -48,16 +48,30 @@ public abstract class ClassUtils {
         }
     }
 
+    public static String getClassFileName(Class<?> clazz) {
+        String className = clazz.getName();
+        int lastDotIndex = className.lastIndexOf(".");
+        return className.substring(lastDotIndex + 1) + ".class";
+    }
+
     public static <T> T instantiateClass(Class<T> clazz) {
         try {
             Constructor<T> declaredConstructor = clazz.getDeclaredConstructor();
-            return instantiateClass(declaredConstructor);
+            return doInstantiateClass(declaredConstructor);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static <T> T instantiateClass(Constructor<T> constructor, Object... args)
+    public static <T> T instantiateClass(Constructor<T> constructor, Object... args) {
+        try {
+            return doInstantiateClass(constructor, args);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static <T> T doInstantiateClass(Constructor<T> constructor, Object... args)
             throws InvocationTargetException, InstantiationException, IllegalAccessException {
         constructor.setAccessible(true);
 
@@ -90,13 +104,20 @@ public abstract class ClassUtils {
     }
 
     public static Method[] getDeclaredMethods(Class<?> beanClass) {
+        Method[] declaredMethods = beanClass.getDeclaredMethods();
         Class<?>[] interfaces = beanClass.getInterfaces();
+        if (interfaces.length == 0) {
+            return declaredMethods;
+        }
+
         Method[] ifcDefaultMethods = Arrays.stream(interfaces).flatMap(ifc -> {
             Method[] methods1 = ifc.getMethods();
             return Arrays.stream(methods1).filter(ifcMethod -> !Modifier.isAbstract(ifcMethod.getModifiers()));
         }).toArray(Method[]::new);
 
-        Method[] declaredMethods = beanClass.getDeclaredMethods();
+        if (ifcDefaultMethods.length == 0) {
+            return declaredMethods;
+        }
 
         Method[] result = new Method[declaredMethods.length + ifcDefaultMethods.length];
 

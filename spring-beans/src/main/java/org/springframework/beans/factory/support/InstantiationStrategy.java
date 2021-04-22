@@ -4,6 +4,8 @@ package org.springframework.beans.factory.support;
 
 import org.springframework.beans.factory.BeanFactory;
 
+import java.lang.reflect.Constructor;
+
 /**
  * @author yangmeng
  * @version 1.0
@@ -11,4 +13,6 @@ import org.springframework.beans.factory.BeanFactory;
  **/
 public interface InstantiationStrategy {
     Object instantiate(RootBeanDefinition mbd, String beanName, BeanFactory owner);
+
+    Object instantiate(RootBeanDefinition mbd, String beanName, BeanFactory beanFactory, Constructor<?> constructorToUse, Object[] argsToUse);
 }

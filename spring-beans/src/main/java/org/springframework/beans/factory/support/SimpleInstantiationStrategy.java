@@ -5,7 +5,9 @@ package org.springframework.beans.factory.support;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.support.InstantiationStrategy;
+import org.springframework.util.ClassUtils;
+
+import java.lang.reflect.Constructor;
 
 /**
  * @author yangmeng
@@ -18,6 +20,15 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
     @Override
     public Object instantiate(RootBeanDefinition mbd, String beanName, BeanFactory owner) {
+        return null;
+    }
+
+    @Override
+    public Object instantiate(RootBeanDefinition mbd, String beanName, BeanFactory beanFactory, Constructor<?> constructorToUse, Object[] argsToUse) {
+        if (!mbd.hasMethodOverrides()) {
+            return ClassUtils.instantiateClass(constructorToUse, argsToUse);
+        }
+
         return null;
     }
 }

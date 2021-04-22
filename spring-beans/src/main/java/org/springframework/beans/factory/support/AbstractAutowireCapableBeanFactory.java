@@ -2,6 +2,7 @@
 // All rights reserved
 package org.springframework.beans.factory.support;
 
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -11,12 +12,11 @@ import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
-import org.springframework.util.ClassUtils;
+import org.springframework.core.ParameterNameDiscoverer;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
@@ -37,11 +37,14 @@ import static org.springframework.util.ClassUtils.getBeanClassShortName;
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory implements AutowireCapableBeanFactory {
 
     @Setter
+    @Getter
     private InstantiationStrategy instantiationStrategy;
     private final Set<Class<?>> ignoredDependencyInterfaces = new HashSet<>();
     private final ConcurrentMap<String, BeanWrapper> factoryBeanInstanceCache = new ConcurrentHashMap<>();
     private boolean allowCircularReferences = true;
     private boolean allowRawInjectionDespiteWrapping = false;
+    @Getter
+    private ParameterNameDiscoverer parameterNameDiscoverer = new ParameterNameDiscoverer.DefaultParameterNameDiscoverer();
 
     public AbstractAutowireCapableBeanFactory(BeanFactory parentBeanFactory) {
         super(parentBeanFactory);
@@ -56,7 +59,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 
     @Override
-    protected Object createBean(String beanName, RootBeanDefinition mbd, Object... args) {
+    protected Object createBean(String beanName, RootBeanDefinition mbd, Object[] args) {
         RootBeanDefinition mbdToUse = mbd;
 
         Class<?> resolveBeanClass = resolveBeanClass(mbdToUse);
@@ -76,7 +79,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         return doCreateBean(beanName, mbd, args);
     }
 
-    private Object doCreateBean(String beanName, RootBeanDefinition mbd, Object... args) {
+    private Object doCreateBean(String beanName, RootBeanDefinition mbd, Object[] args) {
         BeanWrapper instanceWrapper = null;
         if (mbd.isSingleton()) {
             instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
@@ -94,7 +97,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
         synchronized (mbd.postProcessingLock) {
             if (!mbd.postProcessed) {
-                applyMergedBeanDefinitionPostPorcessors(mbd, beanType, beanName);
+                applyMergedBeanDefinitionPostProcessors(mbd, beanType, beanName);
             }
             mbd.postProcessed = true;
         }
@@ -145,6 +148,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
         Object result = existingBean;
         for (BeanPostProcessor beanPostProcessor : this.getBeanPostProcessors()) {
+            log.info("processorName: {} beanName: {}", getBeanClassShortName(beanPostProcessor), getBeanClassShortName(existingBean));
             Object current = beanPostProcessor.postProcessBeforeInitialization(result, beanName);
             if (current == null) {
                 return result;
@@ -170,14 +174,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         }
     }
 
-    private void applyMergedBeanDefinitionPostPorcessors(RootBeanDefinition mbd, Class<?> beanClass, String beanName) {
-        for (MergedBeanDefinitionPostProcessor processor : this.getBeanPostProcessorCache().mergedDefinition) {
+    private void applyMergedBeanDefinitionPostProcessors(RootBeanDefinition mbd, Class<?> beanClass, String beanName) {
+        List<MergedBeanDefinitionPostProcessor> mergedDefinition = this.getBeanPostProcessorCache().mergedDefinition;
+        for (MergedBeanDefinitionPostProcessor processor : mergedDefinition) {
+            log.info("processorName: {} beanName: {}", getBeanClassShortName(processor), getBeanClassShortName(beanClass));
             processor.postProcessMergedBeanDefinition(mbd, beanClass, beanName);
         }
     }
 
 
-    private BeanWrapper createBeanInstance(String beanName, RootBeanDefinition mbd, Object... args) {
+    private BeanWrapper createBeanInstance(String beanName, RootBeanDefinition mbd, Object[] args) {
         Class<?> beanClass = resolveBeanClass(mbd);
 
         if (mbd.getFactoryMethodName() != null) {
@@ -345,8 +351,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
     protected BeanWrapper autowireConstructor(
             String beanName, RootBeanDefinition mbd, @Nullable Constructor<?>[] ctors, @Nullable Object[] explicitArgs) {
+        ConstructorResolver constructorResolver = new ConstructorResolver(this);
+        BeanWrapper beanWrapper = constructorResolver.autowireConstructor(beanName, mbd, ctors, explicitArgs);
+        return beanWrapper;
+    }
 
 
-        return null;
+    public Object instantiate(RootBeanDefinition mbd, String beanName, Constructor<?> constructorToUse, Object[] argsToUse) {
+        return getInstantiationStrategy().instantiate(mbd, beanName, this, constructorToUse, argsToUse);
     }
 }

@@ -11,4 +11,18 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
     public BeanWrapperImpl(Object beanInstance) {
         super(beanInstance);
     }
+
+    public BeanWrapperImpl() {
+        this(true);
+    }
+
+    public BeanWrapperImpl(boolean registerDefaultEditors) {
+        super(registerDefaultEditors);
+    }
+
+    public void setBeanInstance(Object beanInstance) {
+        this.wrappedObject = beanInstance;
+        this.rootOjbect = beanInstance;
+        this.typeConverterDelegate = new TypeConverterDelegate(this, beanInstance);
+    }
 }

@@ -12,10 +12,16 @@ import javax.annotation.Nullable;
  * @created 2021/4/13 8:11 下午
  **/
 public class TypeConverterDelegate {
-    private PropertyEditorRegistrySupport propertyEditorRegistrySupport;
+    private Object targetObject;
+    private PropertyEditorRegistrySupport propertyEditorRegistry;
 
-    public TypeConverterDelegate(PropertyEditorRegistrySupport propertyEditorRegistrySupport) {
-        this.propertyEditorRegistrySupport = propertyEditorRegistrySupport;
+    public TypeConverterDelegate(PropertyEditorRegistrySupport propertyEditorRegistry) {
+        this(propertyEditorRegistry, null);
+    }
+
+    public TypeConverterDelegate(PropertyEditorRegistrySupport propertyEditorRegistry, Object beanInstance) {
+        this.propertyEditorRegistry = propertyEditorRegistry;
+        this.targetObject = beanInstance;
     }
 
 
@@ -23,7 +29,7 @@ public class TypeConverterDelegate {
                                     @Nullable Class<T> requiredType, @Nullable TypeDescriptor typeDescriptor) {
 
 
-        this.propertyEditorRegistrySupport.findCustomEditor(requiredType, propertyName);
+        this.propertyEditorRegistry.findCustomEditor(requiredType, propertyName);
 
 
         return null;

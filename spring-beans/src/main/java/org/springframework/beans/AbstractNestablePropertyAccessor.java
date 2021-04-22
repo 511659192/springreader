@@ -2,6 +2,11 @@
 // All rights reserved
 package org.springframework.beans;
 
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.annotation.Nullable;
+
 /**
  * @author yangmeng
  * @version 1.0
@@ -9,11 +14,23 @@ package org.springframework.beans;
  **/
 public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyAccessor {
 
-    private Object wrappedObject;
+    @Getter
+    @Setter
+    Object wrappedObject;
+
+    @Nullable
+    Object rootOjbect;
+
 
     public AbstractNestablePropertyAccessor(Object beanInstance) {
         this.wrappedObject = beanInstance;
         registerDefaultEditors();
+    }
+
+    public AbstractNestablePropertyAccessor(boolean registerDefaultEditors) {
+        if (registerDefaultEditors) {
+            registerDefaultEditors();
+        }
     }
 
     public final Object getWrappedInstance() {
@@ -23,4 +40,5 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
     public final Class<?> getWrappedClass() {
         return getWrappedInstance().getClass();
     }
+
 }

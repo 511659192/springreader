@@ -78,12 +78,12 @@ public class PostProcessorRegistrationDelegate {
         return newProcessors;
     }
 
-    private static List<BeanPostProcessor> registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory, Set<String> processedBeans, Class<?> requiredType) {
+    private static List<BeanPostProcessor> registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory, Set<String> processedBeanNames, Class<?> requiredType) {
         List<BeanPostProcessor> newProcessors = Lists.newArrayList();
 
         String[] beanFactoryPostProcessorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class, true, false);
         for (String postProcessorName : beanFactoryPostProcessorNames) {
-            if (processedBeans.contains(postProcessorName)) {
+            if (processedBeanNames.contains(postProcessorName)) {
                 continue;
             }
 
@@ -92,7 +92,7 @@ public class PostProcessorRegistrationDelegate {
             }
 
             newProcessors.add(beanFactory.getBean(postProcessorName, BeanPostProcessor.class));
-            processedBeans.add(postProcessorName);
+            processedBeanNames.add(postProcessorName);
         }
 
         if (CollectionUtils.isEmpty(newProcessors)) {

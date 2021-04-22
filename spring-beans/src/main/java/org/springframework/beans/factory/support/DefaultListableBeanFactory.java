@@ -91,7 +91,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     public void registerAlias(String name, String alias) {
     }
 
-    public <T> T getBean(Class<T> requiredType, Object... args) {
+    public <T> T getBean(Class<T> requiredType, Object[] args) {
         ResolvableType resolvableType = ResolvableType.forRawClass(requiredType);
         Object resolved = resolveBean(resolvableType, args, false);
         return (T) Preconditions.checkNotNull(resolved);

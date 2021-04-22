@@ -17,4 +17,8 @@ public class MethodOverrides {
     public void addOverride(MethodOverride override) {
         this.overrides.add(override);
     }
+
+    public boolean isEmpty() {
+        return this.overrides.isEmpty();
+    }
 }

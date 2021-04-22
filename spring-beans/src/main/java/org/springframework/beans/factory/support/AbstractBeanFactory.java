@@ -30,6 +30,7 @@ import org.springframework.util.ClassUtils;
 
 import javax.annotation.Nullable;
 import java.beans.PropertyEditor;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -173,7 +174,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         return doGetBean(name, classType, null, false);
     }
 
-    public <T> T getBean(String name, @Nullable Class<T> requiredType, @Nullable Object... args) {
+    public <T> T getBean(String name, @Nullable Class<T> requiredType, @Nullable Object[] args) {
         return doGetBean(name, requiredType, args, false);
     }
 
@@ -184,7 +185,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         if (sharedInstance == null || args != null) {
             RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
             if (mbd.isSingleton()) {
-                sharedInstance = getSingleton(beanName, () -> createBean(beanName, mbd));
+                sharedInstance = getSingleton(beanName, () -> createBean(beanName, mbd, args));
             } else {
                 // todo not support
             }
@@ -240,7 +241,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         return mbd.resolveBeanClass(beanClassLoader);
     }
 
-    protected abstract Object createBean(String beanName, RootBeanDefinition mbd, Object... args);
+    protected abstract Object createBean(String beanName, RootBeanDefinition mbd, Object[] args);
 
     protected String transformedBeanName(String name) {
         return name;
@@ -430,6 +431,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         return getMergedLocalBeanDefinition(beanName);
     }
 
+
     /**
      * Internal cache of pre-filtered post-processors.
      *
@@ -445,6 +447,18 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
     }
 
     private class BeanPostProcessorCacheAwareList extends CopyOnWriteArrayList<BeanPostProcessor> {
+        @Override
+        public boolean add(BeanPostProcessor beanPostProcessor) {
+            beanPostProcessorCache = null;
+            return super.add(beanPostProcessor);
+        }
+
+
+        @Override
+        public boolean remove(Object o) {
+            beanPostProcessorCache = null;
+            return super.remove(o);
+        }
 
     }
 
