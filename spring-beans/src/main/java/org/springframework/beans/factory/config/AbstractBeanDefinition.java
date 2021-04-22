@@ -83,11 +83,12 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
     private MethodOverrides methodOverrides = new MethodOverrides();
 
     public AbstractBeanDefinition() {
+        this(null, null);
     }
 
-    public AbstractBeanDefinition(Class<?> beanClass) {
-        this.beanClass = beanClass;
-        this.beanClassName = beanClass.getName();
+    public AbstractBeanDefinition(@Nullable MutablePropertyValues propertyValues, @Nullable ConstructorArgumentValues constructorArgumentValues) {
+        this.propertyValues = propertyValues;
+        this.constructorArgumentValues = constructorArgumentValues;
     }
 
     public AbstractBeanDefinition(BeanDefinition original) {

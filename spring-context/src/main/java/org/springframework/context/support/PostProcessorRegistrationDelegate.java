@@ -3,6 +3,7 @@
 package org.springframework.context.support;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -16,6 +17,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -76,17 +78,27 @@ public class PostProcessorRegistrationDelegate {
         return newProcessors;
     }
 
-    private static List<BeanPostProcessor> registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory, Class<?> requiredType) {
+    private static List<BeanPostProcessor> registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory, Set<String> processedBeans, Class<?> requiredType) {
         List<BeanPostProcessor> newProcessors = Lists.newArrayList();
 
         String[] beanFactoryPostProcessorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class, true, false);
         for (String postProcessorName : beanFactoryPostProcessorNames) {
+            if (processedBeans.contains(postProcessorName)) {
+                continue;
+            }
+
             if (requiredType != null && !beanFactory.isTypeMatch(postProcessorName, requiredType)) {
                 continue;
             }
 
             newProcessors.add(beanFactory.getBean(postProcessorName, BeanPostProcessor.class));
+            processedBeans.add(postProcessorName);
         }
+
+        if (CollectionUtils.isEmpty(newProcessors)) {
+            return Collections.emptyList();
+        }
+
         sortPostProcessors(newProcessors, beanFactory);
         doAddBeanPostProcessors(beanFactory, newProcessors);
         return newProcessors;
@@ -150,9 +162,12 @@ public class PostProcessorRegistrationDelegate {
         int count = beanFactory.getBeanPostProcessorCount() + 1 + CollectionUtils.size(beanPostProcessorNames);
         beanFactory.addBeanPostProcessor(new BeanPostProcessorChecker(beanFactory, count));
 
-        registerBeanPostProcessors(beanFactory, PriorityOrdered.class);
-        registerBeanPostProcessors(beanFactory, Ordered.class);
-        registerBeanPostProcessors(beanFactory, ((Class) null));
-        registerBeanPostProcessors(beanFactory, MergedBeanDefinitionPostProcessor.class);
+        Set<String> processedBeans = Sets.newHashSet();
+        registerBeanPostProcessors(beanFactory, processedBeans, PriorityOrdered.class);
+        registerBeanPostProcessors(beanFactory, processedBeans, Ordered.class);
+        registerBeanPostProcessors(beanFactory, processedBeans, ((Class) null));
+
+        processedBeans.clear();
+        registerBeanPostProcessors(beanFactory, processedBeans, MergedBeanDefinitionPostProcessor.class);
     }
 }

@@ -113,8 +113,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
             Object oldObject = this.singletonObjects.get(beanName);
             if (oldObject != null) {
                 throw new IllegalStateException(
-                        "Could not register object [" + singletonObject + "] under bean name '" + beanName + "': there is already object ["
-                                + oldObject + "] bound");
+                        "Could not register object [" + singletonObject + "] under bean name '" + beanName + "': there is already object [" + oldObject + "] bound");
             }
             addSingleton(beanName, singletonObject);
         }

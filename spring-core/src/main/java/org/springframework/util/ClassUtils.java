@@ -123,4 +123,19 @@ public abstract class ClassUtils {
             throw new RuntimeException(e);
         }
     }
+
+    public static String getBeanClassShortName(Object obj) {
+        String name;
+        if (obj instanceof Class) {
+            name = ((Class<?>) obj).getName();
+        } else {
+            name = obj.getClass().getName();
+        }
+
+        return getBeanClassShortName(name);
+    }
+
+    private static String getBeanClassShortName(String classFullName) {
+        return classFullName.substring(classFullName.lastIndexOf(".") + 1);
+    }
 }

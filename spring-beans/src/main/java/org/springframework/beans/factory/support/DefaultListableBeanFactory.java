@@ -344,12 +344,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
                 throw new IllegalArgumentException("Value [" + autowiredValue + "] does not implement specified dependency type [" + dependencyType.getName() + "]");
             }
             this.resolvableDependencies.put(dependencyType, autowiredValue);
+
+            log.info(" type:{} value:{}", dependencyType.getName(), autowiredValue.getClass().getName());
         }
     }
 
     @Override
     public void registerSingleton(String beanName, Object singletonObject) {
         super.registerSingleton(beanName, singletonObject);
+        log.info(" singleton:{} class:{}", beanName, singletonObject.getClass().getName());
     }
 
     @Nullable

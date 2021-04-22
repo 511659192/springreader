@@ -16,6 +16,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
+import org.springframework.util.ClassUtils;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
@@ -24,6 +25,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import static org.springframework.util.ClassUtils.getBeanClassShortName;
 
 /**
  * @author yangmeng
@@ -272,11 +275,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
     private Object applyBeanPostProcessorsAfterInitialization(Object bean, String beanName) {
-        log.info("beanName:{}", beanName);
         Object using = bean;
         List<BeanPostProcessor> beanPostProcessors = this.getBeanPostProcessors();
         for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
-            log.info("processorName:{}", beanPostProcessor.getClass().getName());
+            log.info("processorName: {} beanName: {}", getBeanClassShortName(beanPostProcessor), getBeanClassShortName(bean));
             Object current = beanPostProcessor.postProcessAfterInitialization(bean, beanName);
             if (current == null) {
                 return using;
@@ -289,10 +291,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
     private Object applyBeanPostProcessorsBeforeInstantiation(Class<?> beanClass, String beanName) {
-        log.info("beanName:{}", beanName);
-
         for (InstantiationAwareBeanPostProcessor beanPostProcessor : getBeanPostProcessorCache().instantiationAware) {
-            log.info("processorName:{}", beanPostProcessor.getClass().getName());
+            log.info("processorName: {} beanName: {}", getBeanClassShortName(beanPostProcessor), getBeanClassShortName(beanClass));
             Object bean = beanPostProcessor.postProcessBeforeInstantiation(beanClass, beanName);
             if (bean != null) {
                 return bean;

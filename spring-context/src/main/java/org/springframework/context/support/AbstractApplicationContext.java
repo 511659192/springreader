@@ -182,6 +182,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     }
 
     private void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+        log.info("");
         ClassLoader classLoader = getClassLoader();
         beanFactory.setBeanClassLoader(classLoader);
 

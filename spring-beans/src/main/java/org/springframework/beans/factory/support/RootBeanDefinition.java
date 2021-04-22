@@ -49,7 +49,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
     }
 
     public RootBeanDefinition(@Nullable Class<?> beanClass) {
-        super(beanClass);
+        super();
+        setBeanClass(beanClass);
     }
 
     public Class<?> getTargetType() {
@@ -76,12 +77,6 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
         return new RootBeanDefinition(this);
     }
 
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", RootBeanDefinition.class.getSimpleName() + "[", "]").add("beforeInstantiationResolved=" + beforeInstantiationResolved)
-                .add("resolvedTargetType=" + resolvedTargetType).add("targetType=" + targetType).add("constructorArgumentLock=" + constructorArgumentLock)
-                .add("postProcessingLock=" + postProcessingLock).add("resolvedConstructorOrFactoryMethod=" + resolvedConstructorOrFactoryMethod).add("postProcessed=" + postProcessed).toString();
-    }
 
     @Nullable
     public Constructor<?>[] getPreferredConstructors() {
@@ -91,5 +86,10 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
     @Nullable
     public BeanDefinitionHolder getDecoratedDefinition() {
         return this.decoratedDefinition;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", RootBeanDefinition.class.getSimpleName() + "[", "]").add("resolvedTargetType=" + resolvedTargetType).toString();
     }
 }

@@ -28,9 +28,4 @@ public class ScannedGenericBeanDefinition extends GenericBeanDefinition implemen
         setResource(metadataReader.getResource());
         log.info("className:{}", this.metadata.getClassName());
     }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", ScannedGenericBeanDefinition.class.getSimpleName() + "[", "]").add("metadata=" + metadata).toString();
-    }
 }

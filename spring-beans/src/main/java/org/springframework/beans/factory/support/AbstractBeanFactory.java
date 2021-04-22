@@ -40,6 +40,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static org.springframework.util.ClassUtils.getBeanClassShortName;
+
 /**
  * @author yangmeng
  * @version 1.0
@@ -50,6 +52,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
     @Nullable
     private TypeConverter typeConverter;
+    @Getter
+    private boolean cacheBeanMetadata = true;
 
     @Getter
     private BeanFactory parentBeanFactory;
@@ -259,13 +263,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
     private RootBeanDefinition getMergedBeanDefinition(String beanName, BeanDefinition beanDefinition, @Nullable BeanDefinition containingBd) {
         synchronized (this.mergedBeanDefinitions) {
-            RootBeanDefinition mbd = this.mergedBeanDefinitions.get(beanName);
-            if (mbd == null || mbd.stale) {
+            RootBeanDefinition mergedBeanDef = this.mergedBeanDefinitions.get(beanName);
+            if (mergedBeanDef == null || mergedBeanDef.stale) {
                 if (beanDefinition.getParentName() == null) {
                     if (beanDefinition instanceof RootBeanDefinition) {
-                        mbd = ((RootBeanDefinition) beanDefinition).cloneBeanDefinition();
+                        mergedBeanDef = ((RootBeanDefinition) beanDefinition).cloneBeanDefinition();
                     } else {
-                        mbd = new RootBeanDefinition(beanDefinition);
+                        mergedBeanDef = new RootBeanDefinition(beanDefinition);
                     }
                 } else {
                     BeanDefinition parentBeanDefinition;
@@ -281,12 +285,16 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
                         }
                     }
 
-                    mbd = new RootBeanDefinition(parentBeanDefinition);
-                    mbd.overrideFrom(beanDefinition);
+                    mergedBeanDef = new RootBeanDefinition(parentBeanDefinition);
+                    mergedBeanDef.overrideFrom(beanDefinition);
+                }
+
+                if (containingBd == null && isCacheBeanMetadata()) {
+                    this.mergedBeanDefinitions.put(beanName, mergedBeanDef);
                 }
             }
 
-            return mbd;
+            return mergedBeanDef;
         }
     }
 
@@ -347,17 +355,20 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         }
 
         this.customEditors.forEach((beanType, editorClass) -> registry.registerCustomEditor(beanType, BeanUtils.instantiateClass(editorClass)));
+        log.info("customEditor:{}", getBeanClassShortName(registry));
     }
 
     @Override
     public void addPropertyEditorRegistrar(PropertyEditorRegistrar registrar) {
         this.propertyEditorRegistrars.add(registrar);
+        log.info(" register:{}", getBeanClassShortName(registrar));
     }
 
     @Override
     public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
         this.beanPostProcessors.remove(beanPostProcessor);
         this.beanPostProcessors.add(beanPostProcessor);
+        log.info(" refresh processor:{}", getBeanClassShortName(beanPostProcessor));
     }
 
     @Override
