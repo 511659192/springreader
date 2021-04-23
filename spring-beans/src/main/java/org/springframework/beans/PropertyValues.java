@@ -2,8 +2,6 @@
 // All rights reserved
 package org.springframework.beans;
 
-import org.springframework.beans.PropertyValue;
-
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Spliterator;
@@ -25,4 +23,7 @@ public interface PropertyValues extends Iterable<PropertyValue> {
     }
 
     PropertyValue[] getPropertyValues();
+
+
+    boolean isEmpty();
 }

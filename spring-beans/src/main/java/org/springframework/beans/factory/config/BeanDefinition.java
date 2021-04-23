@@ -53,4 +53,8 @@ public interface BeanDefinition {
         return null;
     }
 
+    default boolean hasPropertyValues() {
+        return !getPropertyValues().isEmpty();
+    }
+
 }

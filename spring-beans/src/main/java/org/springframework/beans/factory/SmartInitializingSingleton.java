@@ -8,4 +8,5 @@ package org.springframework.beans.factory;
  * @created 2021/4/20 8:10 下午
  **/
 public interface SmartInitializingSingleton {
+    void afterSingletonsInstantiated();
 }

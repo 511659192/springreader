@@ -5,14 +5,19 @@ package org.springframework.beans.factory.support;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
@@ -20,8 +25,10 @@ import org.springframework.core.ParameterNameDiscoverer;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -59,7 +66,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 
     @Override
-    protected Object createBean(String beanName, RootBeanDefinition mbd, Object[] args) {
+    protected Object createBean(String beanName, RootBeanDefinition mbd, Object... args) {
         RootBeanDefinition mbdToUse = mbd;
 
         Class<?> resolveBeanClass = resolveBeanClass(mbdToUse);
@@ -79,7 +86,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         return doCreateBean(beanName, mbd, args);
     }
 
-    private Object doCreateBean(String beanName, RootBeanDefinition mbd, Object[] args) {
+    private Object doCreateBean(String beanName, RootBeanDefinition mbd, Object... args) {
         BeanWrapper instanceWrapper = null;
         if (mbd.isSingleton()) {
             instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
@@ -162,16 +169,47 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     private void invokeAwareMethods(String beanName, Object bean) {
     }
 
-    private void polulateBean(String beanName, RootBeanDefinition mbd, BeanWrapper wrapper) {
-
+    private void polulateBean(String beanName, RootBeanDefinition mbd, BeanWrapper beanWrapper) {
+        List<InstantiationAwareBeanPostProcessor> instAwareBpps = getBeanPostProcessorCache().instantiationAware;
         if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
-            List<InstantiationAwareBeanPostProcessor> instantiationAware = getBeanPostProcessorCache().instantiationAware;
-            for (InstantiationAwareBeanPostProcessor bp : instantiationAware) {
-                if (!bp.postProcessAfterInstantiation(wrapper.getWrappedInstance(), beanName)) {
+            for (InstantiationAwareBeanPostProcessor bp : instAwareBpps) {
+                if (!bp.postProcessAfterInstantiation(beanWrapper.getWrappedInstance(), beanName)) {
                     return;
                 }
             }
         }
+
+        PropertyValues pvs = mbd.getPropertyValues();
+        int resolvedAutowireMode = mbd.getResolvedAutowireMode();
+        if (resolvedAutowireMode == AUTOWIRE_BY_NAME) {
+            autowireByName(beanName, mbd, beanWrapper, pvs);
+        }
+
+        if (resolvedAutowireMode == AUTOWIRE_BY_TYPE) {
+            autowireByType(beanName, mbd, beanWrapper, pvs);
+        }
+
+        for (InstantiationAwareBeanPostProcessor instAwareBpp : instAwareBpps) {
+            PropertyValues pvsToUse = instAwareBpp.postProcessProperties(pvs, beanWrapper.getWrappedInstance(), beanName);
+            pvs = pvsToUse;
+        }
+
+        applyPropertyValues(beanName, mbd, beanWrapper, pvs);
+
+    }
+
+    protected void applyPropertyValues(String beanName, BeanDefinition mbd, BeanWrapper bw, PropertyValues pvs) {
+        if (pvs == null || pvs.isEmpty()) {
+            return;
+        }
+    }
+
+    private void autowireByType(String beanName, RootBeanDefinition mbd, BeanWrapper beanWrapper, PropertyValues newPvs) {
+
+    }
+
+    private void autowireByName(String beanName, RootBeanDefinition mbd, BeanWrapper beanWrapper, PropertyValues newPvs) {
+
     }
 
     private void applyMergedBeanDefinitionPostProcessors(RootBeanDefinition mbd, Class<?> beanClass, String beanName) {
@@ -183,7 +221,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
 
-    private BeanWrapper createBeanInstance(String beanName, RootBeanDefinition mbd, Object[] args) {
+    private BeanWrapper createBeanInstance(String beanName, RootBeanDefinition mbd, Object... args) {
         Class<?> beanClass = resolveBeanClass(mbd);
 
         if (mbd.getFactoryMethodName() != null) {
@@ -193,7 +231,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         boolean resolved = false;
         boolean autowireNecessary = false;
 
-        if (args.length == 0) {
+        if (ArrayUtils.isEmpty(args)) {
             synchronized (mbd.constructorArgumentLock) {
                 if (mbd.resolvedConstructorOrFactoryMethod != null) {
                     resolved = true;
@@ -212,7 +250,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
         Constructor<?>[] ctors = determineConstructorsFromBeanPostProcessors(beanClass, beanName);
 
-        if (ctors != null || mbd.getResolvedAutowireMode() == AUTOWIRE_CONSTRUCTOR || mbd.hasConstructorArgumentValues() || args.length != 0) {
+        if (ctors != null || mbd.getResolvedAutowireMode() == AUTOWIRE_CONSTRUCTOR || mbd.hasConstructorArgumentValues() || ArrayUtils.isNotEmpty(args)) {
             return autowireConstructor(beanName, mbd, ctors, args);
         }
 

@@ -17,9 +17,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static org.springframework.beans.factory.config.AutowireCapableBeanFactory.AUTOWIRE_AUTODETECT;
-import static org.springframework.beans.factory.config.AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE;
-import static org.springframework.beans.factory.config.AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR;
-import static org.springframework.beans.factory.config.AutowireCapableBeanFactory.AUTOWIRE_NO;
 
 
 /**
@@ -202,5 +199,4 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
     public ConstructorArgumentValues getConstructorArgumentValues() {
         return Optional.of(this.constructorArgumentValues).orElseGet(() -> new ConstructorArgumentValues());
     }
-
 }

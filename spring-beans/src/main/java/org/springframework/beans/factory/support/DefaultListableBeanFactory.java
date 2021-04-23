@@ -9,7 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.SmartFactoryBean;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -91,7 +94,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     public void registerAlias(String name, String alias) {
     }
 
-    public <T> T getBean(Class<T> requiredType, Object[] args) {
+    public <T> T getBean(Class<T> requiredType, Object... args) {
         ResolvableType resolvableType = ResolvableType.forRawClass(requiredType);
         Object resolved = resolveBean(resolvableType, args, false);
         return (T) Preconditions.checkNotNull(resolved);
@@ -260,7 +263,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     }
 
     @Nullable
-    private <T> NamedBeanHolder<T> resolveNamedBean(String beanName, ResolvableType requiredType, @Nullable Object[] args) {
+    private <T> NamedBeanHolder<T> resolveNamedBean(String beanName, ResolvableType requiredType, @Nullable Object... args) {
         Object bean = getBean(beanName, null, args);
         if (bean instanceof NullBean) {
             return null;
@@ -379,6 +382,27 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
     @Override
     public void preInstantiateSingletons() {
+        for (String beanName : beanDefinitionNames) {
+            RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+            if (!mbd.isAbstract() && mbd.isSingleton() && !mbd.isLazyInit()) {
+                if (isFactoryBean(beanName)) {
+                    Object bean = getBean("&" + beanName);
+                    FactoryBean factoryBean = (FactoryBean) bean;
+                    boolean isEagerInit = factoryBean instanceof SmartFactoryBean && ((SmartFactoryBean<?>) factoryBean).isEagerInit();
+                    if (isEagerInit) {
+                        getBean(beanName);
+                    }
+                } else {
+                    getBean(beanName);
+                }
+            }
+        }
 
+        for (String beanName : beanDefinitionNames) {
+            Object singleton = getSingleton(beanName);
+            if (singleton instanceof SmartInitializingSingleton) {
+                ((SmartInitializingSingleton) singleton).afterSingletonsInstantiated();
+            }
+        }
     }
 }

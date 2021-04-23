@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.BeanUtils;
@@ -174,7 +175,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         return doGetBean(name, classType, null, false);
     }
 
-    public <T> T getBean(String name, @Nullable Class<T> requiredType, @Nullable Object[] args) {
+    public <T> T getBean(String name, @Nullable Class<T> requiredType, @Nullable Object... args) {
         return doGetBean(name, requiredType, args, false);
     }
 
@@ -182,7 +183,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         String beanName = transformedBeanName(name);
 
         Object sharedInstance = getSingleton(beanName);
-        if (sharedInstance == null || args != null) {
+        if (sharedInstance == null || ArrayUtils.isNotEmpty(args)) {
             RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
             if (mbd.isSingleton()) {
                 sharedInstance = getSingleton(beanName, () -> createBean(beanName, mbd, args));
@@ -241,7 +242,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         return mbd.resolveBeanClass(beanClassLoader);
     }
 
-    protected abstract Object createBean(String beanName, RootBeanDefinition mbd, Object[] args);
+    protected abstract Object createBean(String beanName, RootBeanDefinition mbd, Object... args);
 
     protected String transformedBeanName(String name) {
         return name;

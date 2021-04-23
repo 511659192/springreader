@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
  * @version 1.0
  * @created 2021/4/13 5:08 下午
  **/
-public interface FactoryBean {
+public interface FactoryBean<T> {
 
     @Nullable
     Class<?> getObjectType();

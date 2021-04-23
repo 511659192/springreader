@@ -5,6 +5,7 @@ package org.springframework.util;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -158,5 +159,9 @@ public abstract class ClassUtils {
 
     private static String getBeanClassShortName(String classFullName) {
         return classFullName.substring(classFullName.lastIndexOf(".") + 1);
+    }
+
+    public static PropertyDescriptor findPropertyForMethod(Method method, Class<?> beanClass) {
+        return null;
     }
 }
