@@ -3,6 +3,7 @@
 package org.springframework.core.annotation;
 
 import lombok.Getter;
+import org.springframework.util.ClassUtils;
 
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
@@ -61,7 +62,12 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
         return null;
     }
 
-    private static <A extends Annotation> MergedAnnotation<A> createIfPossible(AnnotationTypeMapping typeMapping, Object source, Object rootAttributes, ValueExtractor valueExtractor, int aggregateIndex) {
+    @Nullable
+    static <A extends Annotation> TypeMappedAnnotation<A> createIfPossible(AnnotationTypeMapping mapping, @Nullable Object source, Annotation annotation, int aggregateIndex) {
+        return createIfPossible(mapping, source, annotation, ClassUtils::invokeMethod, aggregateIndex);
+    }
+
+    private static <A extends Annotation> TypeMappedAnnotation<A> createIfPossible(AnnotationTypeMapping typeMapping, Object source, Object rootAttributes, ValueExtractor valueExtractor, int aggregateIndex) {
         return new TypeMappedAnnotation<>(typeMapping, null, source, rootAttributes, valueExtractor, aggregateIndex);
     }
 

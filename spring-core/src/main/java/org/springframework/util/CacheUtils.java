@@ -15,8 +15,8 @@ import java.util.concurrent.ExecutionException;
  **/
 public class CacheUtils {
 
-    public static CacheBuilder newBuilder() {
-        return CacheBuilder.newBuilder();
+    public static <K, V> CacheBuilder newBuilder() {
+        return CacheBuilder.<K, V>newBuilder();
     }
 
     public static <K, V> V get(Cache<K, V> cache, K key,  Callable<V> callable) {

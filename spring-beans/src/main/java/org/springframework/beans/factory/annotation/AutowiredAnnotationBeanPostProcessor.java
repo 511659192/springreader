@@ -121,7 +121,6 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
                 return new Constructor[0];
             }
         });
-
     }
 
     @Nullable
@@ -133,17 +132,14 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
                 return mergedAnnotation;
             }
         }
-
         return null;
     }
-
 
     @Override
     public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
         InjectionMetadata injectionMetadata = findInjectionMetadata(beanName, bean.getClass(), pvs);
-
-
-        return null;
+        injectionMetadata.inject(bean, beanName, pvs);
+        return pvs;
     }
 
 

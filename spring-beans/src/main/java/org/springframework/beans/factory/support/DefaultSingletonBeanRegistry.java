@@ -2,9 +2,12 @@
 // All rights reserved
 package org.springframework.beans.factory.support;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheLoader;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
+import org.springframework.util.CacheUtils;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -12,6 +15,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -23,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 
 
-    private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
+    private Cache<String, Object> singletonObjectsCache = CacheUtils.newBuilder().build();
 
     /** Cache of singleton factories: bean name to ObjectFactory. */
     private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
@@ -42,7 +46,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 
     @Nullable
     protected Object getSingleton(String beanName, boolean allowEarlyReference) {
-        Object singletonObject = this.singletonObjects.get(beanName);
+        Object singletonObject = this.singletonObjectsCache.getIfPresent(beanName);
         if (singletonObject != null) {
             return singletonObject;
         }
@@ -60,26 +64,20 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
             return null;
         }
 
-        synchronized (this.singletonObjects) {
-            singletonObject = this.singletonObjects.get(beanName);
-            if (singletonObject != null) {
-                return singletonObject;
-            }
-
-            singletonObject = this.earlySingletonObjects.get(beanName);
-            if (singletonObject != null) {
-                return singletonObject;
+        return CacheUtils.get(singletonObjectsCache, beanName, () -> {
+            Object obj = this.earlySingletonObjects.get(beanName);
+            if (obj != null) {
+                return obj;
             }
 
             ObjectFactory factory = this.singletonFactories.get(beanName);
             if (factory != null) {
-                singletonObject = factory.getObject();
-                this.earlySingletonObjects.put(beanName, singletonObject);
+                obj = factory.getObject();
+                this.earlySingletonObjects.put(beanName, obj);
                 this.singletonFactories.remove(beanName);
             }
-        }
-
-        return singletonObject;
+            return obj;
+        });
     }
 
     public boolean isSingletonCurrentlyInCreation(String beanName) {
@@ -87,21 +85,16 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
     }
 
     public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
-        synchronized (this.singletonObjects) {
-            Object singletonObject = this.singletonObjects.get(beanName);
-            if (singletonObject != null) {
-                return singletonObject;
-            }
-
-            singletonObject = singletonFactory.getObject();
+        return CacheUtils.get(singletonObjectsCache, beanName, () -> {
+            Object singletonObject = singletonFactory.getObject();
             addSingleton(beanName, singletonObject);
             return singletonObject;
-        }
+        });
     }
 
     private void addSingleton(String beanName, Object singletonObject) {
-        synchronized (this.singletonObjects) {
-            this.singletonObjects.put(beanName, singletonObject);
+        synchronized (this.singletonObjectsCache) {
+            this.singletonObjectsCache.put(beanName, singletonObject);
             this.singletonFactories.remove(beanName);
             this.registeredSingletons.add(beanName);
         }
@@ -109,11 +102,10 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 
     @Override
     public void registerSingleton(String beanName, Object singletonObject) {
-        synchronized (this.singletonObjects) {
-            Object oldObject = this.singletonObjects.get(beanName);
+        synchronized (this.singletonObjectsCache) {
+            Object oldObject = this.singletonObjectsCache.getIfPresent(beanName);
             if (oldObject != null) {
-                throw new IllegalStateException(
-                        "Could not register object [" + singletonObject + "] under bean name '" + beanName + "': there is already object [" + oldObject + "] bound");
+                throw new IllegalStateException("Could not register object [" + singletonObject + "] under bean name '" + beanName + "': there is already object [" + oldObject + "] bound");
             }
             addSingleton(beanName, singletonObject);
         }
@@ -121,12 +113,12 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 
     @Override
     public boolean containsSingleton(String beanName) {
-        return this.singletonObjects.containsKey(beanName);
+        return this.singletonObjectsCache.getIfPresent(beanName) != null;
     }
 
     protected void addSingletonFactory(String beanName, ObjectFactory<?> singletonFactory) {
-        synchronized (this.singletonObjects) {
-            if (this.singletonObjects.containsKey(beanName)) {
+        synchronized (this.singletonObjectsCache) {
+            if (this.singletonObjectsCache.getIfPresent(beanName) != null) {
                 return;
             }
 

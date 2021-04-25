@@ -29,8 +29,7 @@ public class AnnotationTypeMapping {
     @Nullable
     private final Annotation annotation;
 
-    public <A extends Annotation> AnnotationTypeMapping(@Nullable AnnotationTypeMapping parentMapping,
-            Class<? extends Annotation> annotationType, @Nullable Annotation annotation) {
+    public <A extends Annotation> AnnotationTypeMapping(@Nullable AnnotationTypeMapping parentMapping, Class<? extends Annotation> annotationType, @Nullable Annotation annotation) {
         this.parentMapping = parentMapping;
         this.root = (parentMapping != null ? parentMapping.getRoot() : this);
         this.annotationType = annotationType;
@@ -44,7 +43,7 @@ public class AnnotationTypeMapping {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", AnnotationTypeMapping.class.getSimpleName() + "[", "]").add("distance=" + distance).add("annotationType=" + annotationType).add(
-                "annotation=" + annotation).toString();
+        return new StringJoiner(", ", AnnotationTypeMapping.class.getSimpleName() + "[", "]").add("distance=" + distance).add("annotationType=" + annotationType).add("annotation=" + annotation)
+                .toString();
     }
 }

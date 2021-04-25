@@ -4,6 +4,7 @@ package org.springframework.util;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
@@ -25,6 +26,7 @@ import java.util.stream.Stream;
  * @version 1.0
  * @created 2021/3/29 23:24
  **/
+@Slf4j
 public abstract class ClassUtils {
 
     private static final Map<Class<?>, Object> DEFAULT_TYPE_VALUES;
@@ -163,5 +165,14 @@ public abstract class ClassUtils {
 
     public static PropertyDescriptor findPropertyForMethod(Method method, Class<?> beanClass) {
         return null;
+    }
+
+    public static Object invokeMethod(Method method, Object target) {
+        try {
+            final Object result = method.invoke(target, (Object) null);
+            return result;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

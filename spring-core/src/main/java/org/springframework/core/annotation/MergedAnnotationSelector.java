@@ -13,7 +13,7 @@ import java.lang.annotation.Annotation;
 public interface MergedAnnotationSelector<A extends Annotation> {
 
     default boolean isBestCandidate(MergedAnnotation<A> annotation) {
-        return false;
+        return true;
     }
 
     MergedAnnotation<A> select(MergedAnnotation<A> existing, MergedAnnotation<A> candidate);

@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -95,6 +96,16 @@ public class TypeMappedAnnotations implements MergedAnnotations{
         return null;
     }
 
+
+    private static boolean isMappingForType(AnnotationTypeMapping mapping, AnnotationFilter annotationFilter, @Nullable Object requiredType) {
+        final Class<? extends Annotation> annotationType = mapping.getAnnotationType();
+        if (annotationFilter.matches(annotationType)) {
+            return false;
+        }
+
+        return Objects.equals(annotationType, requiredType);
+    }
+
     private class MergedAnnotationFinder<A extends Annotation> implements AnnotationsProcessor<Object, MergedAnnotation<A>> {
 
         private final Object requiredType;
@@ -102,6 +113,9 @@ public class TypeMappedAnnotations implements MergedAnnotations{
         private final Predicate<? super MergedAnnotation<A>> predicate;
         @Nullable
         private final MergedAnnotationSelector<A> selector;
+
+        @Nullable
+        private MergedAnnotation<A> result;
 
         MergedAnnotationFinder(Object requiredType, @Nullable Predicate<? super MergedAnnotation<A>> predicate, @Nullable MergedAnnotationSelector<A> selector) {
             this.requiredType = requiredType;
@@ -112,6 +126,57 @@ public class TypeMappedAnnotations implements MergedAnnotations{
         @Nullable
         @Override
         public MergedAnnotation<A> doWithAnnotations(Object context, int aggregateIndex, @Nullable Object source, Annotation[] annotations) {
+            for (Annotation annotation : annotations) {
+                if (annotation == null) {
+                    continue;
+                }
+                if (annotationFilter.matches(annotation)) {
+                    continue;
+                }
+
+                final MergedAnnotation<A> result = this.process(context, aggregateIndex, source, annotation);
+                return result;
+            }
+
+
+            return null;
+        }
+
+        @Override
+        public MergedAnnotation<A> doWithAggregate(Object context, int aggregateIndex) {
+            return this.result;
+        }
+
+        @Nullable
+        @Override
+        public MergedAnnotation<A> finish(@Nullable MergedAnnotation<A> result) {
+            return Optional.ofNullable(result).orElse(this.result);
+        }
+
+        @Nullable
+        private MergedAnnotation<A> process(Object type, int aggregateIndex, @Nullable Object source, Annotation annotation) {
+            final AnnotationTypeMappings<A> mappings = AnnotationTypeMappings.forAnnotationType(annotation.annotationType());
+
+            final Iterator<AnnotationTypeMapping> iterator = mappings.iterator();
+            while (iterator.hasNext()) {
+                final AnnotationTypeMapping mapping = iterator.next();
+                if (!TypeMappedAnnotations.isMappingForType(mapping, TypeMappedAnnotations.this.annotationFilter, this.requiredType)) {
+                    continue;
+                }
+
+                final MergedAnnotation<A> candidate = TypeMappedAnnotation.createIfPossible(mapping, source, annotation, aggregateIndex);
+                if (candidate == null) {
+                    continue;
+                }
+
+                if (this.predicate != null && !this.predicate.test(candidate)) {
+                    continue;
+                }
+
+                if (this.selector.isBestCandidate(candidate)) {
+                    return candidate;
+                }
+            }
             return null;
         }
     }

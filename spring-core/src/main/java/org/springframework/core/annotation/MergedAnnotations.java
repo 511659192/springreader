@@ -16,10 +16,27 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
+ * 访问合并注解的集合,这些注解通常来自于 class 或者 method
+ * 每一个合并注解提供一个视图,这个视图中的多个属性值可能通过不同的资源合并而来
+ * 诸如:
+ *  注解本身属性包含显式或者隐式的 AliasFor 声明
+ *  显式为meta-annotation声明AliasFor
+ *  meta-annotation注解别名转换
+ *  meta-annotation注解本身
+ * 举例:
+ *  @PostMapping 注解可能被定义为以下形式
+ *  public @interface PostMapping {
+ *      @AliasFor(attibute = "path")
+ *      String[] value() default {};
+ *      @AliasFor(attibute = "value")
+ *      string[] path() default {};
+ *  }
+ *
  * @author yangmeng
  * @version 1.0
  * @created 2021/4/6 3:36 下午
  **/
+
 public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>> {
     enum SearchStrategy {
 

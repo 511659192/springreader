@@ -12,13 +12,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * @author Administrator
  * @version 1.0
  * @created 2021/4/4 23:07
  **/
-public class AnnotationTypeMappings implements Iterable<AnnotationTypeMapping> {
+public class AnnotationTypeMappings<A extends Annotation> implements Iterable<AnnotationTypeMapping> {
     private final List<AnnotationTypeMapping> typeMappings = Lists.newArrayList();
 
     final Set<String> ignores = Sets.newHashSet("java.lang", "org.springframework.lang");
@@ -60,5 +61,9 @@ public class AnnotationTypeMappings implements Iterable<AnnotationTypeMapping> {
     @Override
     public Iterator<AnnotationTypeMapping> iterator() {
         return this.typeMappings.iterator();
+    }
+
+    public Stream<AnnotationTypeMapping> stream() {
+        return this.typeMappings.stream();
     }
 }

@@ -4,6 +4,7 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * @author yangmeng
@@ -55,7 +56,8 @@ public interface AnnotationFilter {
 
         @Override
         public boolean matches(String typeName) {
-            return true;
+            final Optional<String> any = Arrays.stream(this.prefixes).sequential().filter(prefix -> typeName.startsWith(prefix)).findAny();
+            return any.isPresent();
         }
     }
 }
