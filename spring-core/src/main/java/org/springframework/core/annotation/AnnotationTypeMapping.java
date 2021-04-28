@@ -9,6 +9,9 @@ import java.lang.annotation.Annotation;
 import java.util.StringJoiner;
 
 /**
+ *
+ * 根注解上下文中的具体注解的mapping信息
+ *
  * @author Administrator
  * @version 1.0
  * @created 2021/4/4 23:16

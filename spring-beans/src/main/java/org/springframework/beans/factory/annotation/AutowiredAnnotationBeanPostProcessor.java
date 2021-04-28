@@ -3,10 +3,14 @@
 package org.springframework.beans.factory.annotation;
 
 import com.google.common.cache.Cache;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.TypeConverter;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
@@ -31,8 +35,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static org.springframework.util.CacheUtils.get;
 
 /**
  * @author yangmeng
@@ -45,6 +52,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
     private int order = Ordered.LOWEST_PRECEDENCE - 2;
 
     @Nullable
+    @Setter
     private ConfigurableListableBeanFactory beanFactory;
 
     private final Set<Class<? extends Annotation>> autowiredAnnotationTypes = new LinkedHashSet<>(4);
@@ -95,7 +103,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
             this.lookupMethodsChecked.add(beanName);
         }
 
-        return CacheUtils.get(candidateConstructorsCache, beanClass, () -> {
+        return get(candidateConstructorsCache, beanClass, () -> {
             Constructor<?>[] rawCandidateCtors = beanClass.getDeclaredConstructors();
             List<Constructor<?>> candidates = new ArrayList<>(rawCandidateCtors.length);
             for (Constructor<?> candidate : rawCandidateCtors) {
@@ -115,17 +123,24 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
             if (!candidates.isEmpty()) {
                 return candidates.toArray(new Constructor[0]);
-            } else if (rawCandidateCtors.length == 1 && rawCandidateCtors[0].getParameterCount() == 0) {
-                return new Constructor[]{rawCandidateCtors[0]};
-            } else {
-                return new Constructor[0];
             }
+
+            if (rawCandidateCtors.length == 1 && rawCandidateCtors[0].getParameterCount() == 0) {
+                return new Constructor[]{rawCandidateCtors[0]};
+            }
+
+            return new Constructor[0];
         });
     }
 
+    /**
+     *
+     * @param ao Field Method
+     * @return
+     */
     @Nullable
-    private MergedAnnotation<?> findAutowiredAnnotation(AccessibleObject rawCandidateCtor) {
-        MergedAnnotations mergedAnnotations = MergedAnnotations.from(rawCandidateCtor);
+    private MergedAnnotation<?> findAutowiredAnnotation(AccessibleObject ao) {
+        MergedAnnotations mergedAnnotations = MergedAnnotations.from(ao);
         for (Class<? extends Annotation> annotationType : this.autowiredAnnotationTypes) {
             MergedAnnotation<? extends Annotation> mergedAnnotation = mergedAnnotations.get(annotationType);
             if (mergedAnnotation.isPresent()) {
@@ -144,7 +159,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 
     private InjectionMetadata findInjectionMetadata(String beanName, Class<?> beanClass, PropertyValues pvs) {
-        return CacheUtils.get(injectionMetadataCache, beanName, () -> buildAutowiringMetadata(beanClass));
+        return get(injectionMetadataCache, beanName, () -> buildAutowiringMetadata(beanClass));
     }
 
     private InjectionMetadata buildAutowiringMetadata(Class<?> beanClass) {
@@ -186,8 +201,24 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
         }
 
         @Override
-        protected void inject(Object target, @Nullable String requestingBeanName, @Nullable PropertyValues pvs) {
-            super.inject(target, requestingBeanName, pvs);
+        protected void inject(Object target, @Nullable String beanName, @Nullable PropertyValues pvs) {
+            Field field = (Field) this.member;
+            Object value = resolveFieldValue(field, target, beanName);
+        }
+
+        @Nullable
+        private Object resolveFieldValue(Field field, Object bean, @Nullable String beanName) {
+            DependencyDescriptor descriptor = new DependencyDescriptor(field, this.required);
+            descriptor.setContainingClass(bean.getClass());
+            TypeConverter typeConverter = beanFactory.getTypeConverter();
+
+            Set<String> autowiredBeanNames = new LinkedHashSet<>(1);
+
+            Object value = beanFactory.resolveDependency(descriptor, beanName, autowiredBeanNames, typeConverter);
+
+
+            return value;
+
         }
     }
 

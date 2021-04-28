@@ -2,6 +2,7 @@
 // All rights reserved
 package org.springframework.beans.factory.config;
 
+import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.ListableBeanFactory;
 
 /**
@@ -9,9 +10,11 @@ import org.springframework.beans.factory.ListableBeanFactory;
  * @version 1.0
  * @created 2021/3/23 3:08 下午
  **/
-public interface ConfigurableListableBeanFactory extends ConfigurableBeanFactory, ListableBeanFactory {
+public interface ConfigurableListableBeanFactory extends ConfigurableBeanFactory, ListableBeanFactory, AutowireCapableBeanFactory {
 
     void ignoreDependencyInterface(Class<?> type);
 
     void preInstantiateSingletons();
+
+    TypeConverter getTypeConverter();
 }

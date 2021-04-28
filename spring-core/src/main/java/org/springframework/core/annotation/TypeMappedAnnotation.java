@@ -11,6 +11,10 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
+ * 适配根注解的属性值,通过AnnotationTypeMapping的mapping或者mirroring来获取
+ *
+ * 跟属性值从源对象,通过回调获取.这样同一个类会存在多种不同的注解模型
+ *
  * @author Administrator
  * @version 1.0
  * @created 2021/4/4 23:04

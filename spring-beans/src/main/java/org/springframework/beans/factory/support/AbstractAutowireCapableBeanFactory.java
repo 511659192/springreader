@@ -12,6 +12,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.factory.Aware;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -167,6 +169,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 
     private void invokeAwareMethods(String beanName, Object bean) {
+        if (!(bean instanceof Aware)) {
+            return;
+        }
+
+        if (bean instanceof BeanFactoryAware) {
+            ((BeanFactoryAware) bean).setBeanFactory((ConfigurableListableBeanFactory) this);
+        }
+
+
     }
 
     private void polulateBean(String beanName, RootBeanDefinition mbd, BeanWrapper beanWrapper) {

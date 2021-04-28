@@ -7,15 +7,21 @@ import com.google.common.collect.Maps;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.HierarchicalBeanFactory;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.NamedBeanHolder;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.ResolvableType;
@@ -29,6 +35,7 @@ import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
@@ -404,5 +411,95 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
                 ((SmartInitializingSingleton) singleton).afterSingletonsInstantiated();
             }
         }
+    }
+
+    @Nullable
+    @Override
+    public Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName, @Nullable Set<String> autowiredBeanNames,
+                                    @Nullable TypeConverter typeConverter) {
+
+
+        return doResolveDependency(descriptor, requestingBeanName, autowiredBeanNames, typeConverter);
+    }
+
+    private Object doResolveDependency(DependencyDescriptor descriptor, String beanName, Set<String> autowiredBeanNames, TypeConverter typeConverter) {
+        String autowiredBeanName = null;
+        Object instanceCandidate = null;
+
+        Class<?> type = descriptor.getDependencyType();
+        Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
+        if (MapUtils.size(matchingBeans) == 1) {
+            Map.Entry<String, Object> entry = matchingBeans.entrySet().iterator().next();
+            autowiredBeanName = entry.getKey();
+            instanceCandidate = entry.getValue();
+        }
+
+        if (autowiredBeanName != null) {
+            autowiredBeanNames.add(autowiredBeanName);
+        }
+
+        return instanceCandidate;
+
+    }
+
+    private Map<String, Object> findAutowireCandidates(String beanName, Class<?> requiredType, DependencyDescriptor desc) {
+        String[] candidateNames = beanNamesForTypeIncludingAncestors(this, requiredType, true, desc.isEager());
+        for (Map.Entry<Class<?>, Object> entry : this.resolvableDependencies.entrySet()) {
+            Class<?> autowiringType = entry.getKey();
+            if (autowiringType.isAssignableFrom(requiredType)) {
+
+            }
+        }
+
+
+        for (String candidateName : candidateNames) {
+            if (isSelfReference(beanName, candidateName)) {
+                continue;
+            }
+
+
+
+
+        }
+
+        return null;
+    }
+
+    private boolean isSelfReference(@Nullable String beanName, @Nullable String candidateName) {
+        return Objects.equals(beanName, candidateName);
+    }
+
+    public boolean isAutowireCandidate(String beanName, DependencyDescriptor descriptor) {
+        return isAutowireCandidate(beanName, descriptor, getAutowireCandidateResolver());
+    }
+
+    protected boolean isAutowireCandidate(String beanName, DependencyDescriptor descriptor, AutowireCandidateResolver resolver) {
+        beanName = transformedBeanName(beanName);
+        if (containsBeanDefinition(beanName)) {
+            return false;
+        }
+
+        return ((DefaultListableBeanFactory) getParentBeanFactory()).isAutowireCandidate(beanName, descriptor, resolver);
+    }
+
+    protected boolean isAutowireCandidate(String beanName, RootBeanDefinition mbd, DependencyDescriptor descriptor, AutowireCandidateResolver resolver) {
+        return true;
+    }
+
+    public AutowireCandidateResolver getAutowireCandidateResolver() {
+        return this.autowireCandidateResolver;
+    }
+
+    private String[] beanNamesForTypeIncludingAncestors(ListableBeanFactory beanFactory, Class<?> requiredType, boolean includeNonSingletons, boolean eager) {
+        String[] result = beanFactory.getBeanNamesForType(requiredType, includeNonSingletons, eager);
+        if (beanFactory instanceof HierarchicalBeanFactory) {
+            HierarchicalBeanFactory parent = (HierarchicalBeanFactory) beanFactory;
+            if (parent instanceof ListableBeanFactory) {
+                String[] parentResult = beanNamesForTypeIncludingAncestors(((ListableBeanFactory) parent), requiredType, includeNonSingletons, eager);
+                result = ArrayUtils.addAll(result, parentResult);
+            }
+        }
+
+        return result;
     }
 }

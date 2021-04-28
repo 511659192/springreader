@@ -2,6 +2,7 @@
 // All rights reserved
 package org.springframework.context.event;
 
+import lombok.Setter;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 /**
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
  **/
 public class SimpleApplicationEventMulticaster extends AbstractApplicationEventMulticaster {
 
+    @Setter
     private ConfigurableListableBeanFactory beanFactory;
 
 

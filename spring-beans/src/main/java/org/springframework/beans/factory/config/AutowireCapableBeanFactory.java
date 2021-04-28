@@ -3,7 +3,11 @@
 package org.springframework.beans.factory.config;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactory;
+
+import javax.annotation.Nullable;
+import java.util.Set;
 
 /**
  * @author yangmeng
@@ -23,4 +27,6 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
     int AUTOWIRE_AUTODETECT = 4;
 
 
+    @Nullable
+    Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName, @Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter);
 }

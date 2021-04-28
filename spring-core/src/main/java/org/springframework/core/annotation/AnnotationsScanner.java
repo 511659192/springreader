@@ -42,7 +42,6 @@ abstract class AnnotationsScanner {
 
     private static <R, C> R processElement(C context, AnnotatedElement source, AnnotationsProcessor<C, R> processor) {
         R result = processor.doWithAggregate(context, 0);
-
         if (result != null) {
             return result;
         }

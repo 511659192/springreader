@@ -11,7 +11,6 @@ import java.lang.annotation.Annotation;
  **/
 abstract class AbstractMergedAnnotation<T extends Annotation> implements MergedAnnotation<T> {
 
-
     @Override
     public boolean isMetaPresent() {
         return isPresent() && getDistance() > 0;

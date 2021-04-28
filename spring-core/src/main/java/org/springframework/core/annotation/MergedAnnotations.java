@@ -50,15 +50,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
     <A extends Annotation> MergedAnnotation<A> get(Class<A> annotationType);
 
     static MergedAnnotations from(AnnotatedElement element) {
-        return from(element, SearchStrategy.DIRECT);
-    }
-
-    static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy) {
-        return from(element, searchStrategy, RepeatableContainers.standardRepeatables());
-    }
-
-    static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy, RepeatableContainers repeatableContainers) {
-        return from(element, searchStrategy, repeatableContainers, AnnotationFilter.PLAIN);
+        return from(element, SearchStrategy.DIRECT, RepeatableContainers.standardRepeatables(), AnnotationFilter.PLAIN);
     }
 
     static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy, RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {

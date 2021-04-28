@@ -35,11 +35,11 @@ public class PostProcessorRegistrationDelegate {
         Set<String> processedBeans = new HashSet<>();
         List<BeanDefinitionRegistryPostProcessor> registryProcessors = new ArrayList<>();
 
-        List<BeanDefinitionRegistryPostProcessor> priorityOrdereds = postProcessBeanDefinitionRegistries(beanFactory, processedBeans, PriorityOrdered.class);
-        registryProcessors.addAll(priorityOrdereds);
+        List<BeanDefinitionRegistryPostProcessor> priorityOrderedProcessors = postProcessBeanDefinitionRegistries(beanFactory, processedBeans, PriorityOrdered.class);
+        registryProcessors.addAll(priorityOrderedProcessors);
 
-        List<BeanDefinitionRegistryPostProcessor> ordereds = postProcessBeanDefinitionRegistries(beanFactory, processedBeans, Ordered.class);
-        registryProcessors.addAll(ordereds);
+        List<BeanDefinitionRegistryPostProcessor> orderedProcessors = postProcessBeanDefinitionRegistries(beanFactory, processedBeans, Ordered.class);
+        registryProcessors.addAll(orderedProcessors);
 
         while (true) {
             List<BeanDefinitionRegistryPostProcessor> normals = postProcessBeanDefinitionRegistries(beanFactory, processedBeans, null);
@@ -51,7 +51,7 @@ public class PostProcessorRegistrationDelegate {
         }
 
         invokeBeanFactoryPostProcessors(registryProcessors, beanFactory);
-
+        // BeanFactoryPostProcessor.class
         postProcessBeanFactories(beanFactory, processedBeans, PriorityOrdered.class);
         postProcessBeanFactories(beanFactory, processedBeans, Ordered.class);
         postProcessBeanFactories(beanFactory, processedBeans, null);
