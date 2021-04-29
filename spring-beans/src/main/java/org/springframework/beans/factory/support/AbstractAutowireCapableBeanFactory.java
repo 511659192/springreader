@@ -95,6 +95,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         }
 
         if (instanceWrapper == null) {
+            // 创建实例
             instanceWrapper = createBeanInstance(beanName, mbd, args);
         }
 
@@ -200,8 +201,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             autowireByType(beanName, mbd, beanWrapper, pvs);
         }
 
-        for (InstantiationAwareBeanPostProcessor instAwareBpp : instAwareBpps) {
-            PropertyValues pvsToUse = instAwareBpp.postProcessProperties(pvs, beanWrapper.getWrappedInstance(), beanName);
+        for (InstantiationAwareBeanPostProcessor instantiationAwareBeanPostProcessor : instAwareBpps) {
+            PropertyValues pvsToUse = instantiationAwareBeanPostProcessor.postProcessProperties(pvs, beanWrapper.getWrappedInstance(), beanName);
             pvs = pvsToUse;
         }
 

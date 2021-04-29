@@ -152,8 +152,8 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
     @Override
     public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
-        InjectionMetadata injectionMetadata = findInjectionMetadata(beanName, bean.getClass(), pvs);
-        injectionMetadata.inject(bean, beanName, pvs);
+        InjectionMetadata metadata = findInjectionMetadata(beanName, bean.getClass(), pvs);
+        metadata.inject(bean, beanName, pvs);
         return pvs;
     }
 

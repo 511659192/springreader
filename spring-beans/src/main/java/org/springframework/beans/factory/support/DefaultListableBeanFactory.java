@@ -417,8 +417,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     @Override
     public Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName, @Nullable Set<String> autowiredBeanNames,
                                     @Nullable TypeConverter typeConverter) {
-
-
         return doResolveDependency(descriptor, requestingBeanName, autowiredBeanNames, typeConverter);
     }
 
@@ -446,9 +444,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
         String[] candidateNames = beanNamesForTypeIncludingAncestors(this, requiredType, true, desc.isEager());
         for (Map.Entry<Class<?>, Object> entry : this.resolvableDependencies.entrySet()) {
             Class<?> autowiringType = entry.getKey();
-            if (autowiringType.isAssignableFrom(requiredType)) {
-
+            if (!autowiringType.isAssignableFrom(requiredType)) {
+                continue;
             }
+
+            Object autowiringObject = entry.getValue();
+
+
         }
 
 
@@ -456,6 +458,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
             if (isSelfReference(beanName, candidateName)) {
                 continue;
             }
+
+            if (!isAutowireCandidate(candidateName, desc)) {
+                continue;
+            }
+
 
 
 
@@ -493,9 +500,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     private String[] beanNamesForTypeIncludingAncestors(ListableBeanFactory beanFactory, Class<?> requiredType, boolean includeNonSingletons, boolean eager) {
         String[] result = beanFactory.getBeanNamesForType(requiredType, includeNonSingletons, eager);
         if (beanFactory instanceof HierarchicalBeanFactory) {
-            HierarchicalBeanFactory parent = (HierarchicalBeanFactory) beanFactory;
-            if (parent instanceof ListableBeanFactory) {
-                String[] parentResult = beanNamesForTypeIncludingAncestors(((ListableBeanFactory) parent), requiredType, includeNonSingletons, eager);
+            BeanFactory parentBeanFactory = ((HierarchicalBeanFactory) beanFactory).getParentBeanFactory();
+            if (parentBeanFactory instanceof ListableBeanFactory) {
+                String[] parentResult = beanNamesForTypeIncludingAncestors(((ListableBeanFactory) parentBeanFactory), requiredType, includeNonSingletons, eager);
                 result = ArrayUtils.addAll(result, parentResult);
             }
         }

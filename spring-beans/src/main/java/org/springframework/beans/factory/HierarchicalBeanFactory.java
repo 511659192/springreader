@@ -2,6 +2,8 @@
 // All rights reserved
 package org.springframework.beans.factory;
 
+import javax.annotation.Nullable;
+
 /**
  * @author yangmeng
  * @version 1.0
@@ -10,4 +12,6 @@ package org.springframework.beans.factory;
 public interface HierarchicalBeanFactory extends BeanFactory {
 
     boolean containsLocalBean(String name);
+    @Nullable
+    BeanFactory getParentBeanFactory();
 }

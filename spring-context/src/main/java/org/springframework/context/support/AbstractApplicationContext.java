@@ -285,4 +285,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     public Object getBean(String name) {
         return getBeanFactory().getBean(name);
     }
+
+    @Nullable
+    @Override
+    public BeanFactory getParentBeanFactory() {
+        return this.parent;
+    }
 }
