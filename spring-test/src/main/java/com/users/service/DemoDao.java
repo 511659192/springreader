@@ -2,14 +2,14 @@
 // All rights reserved
 package com.users.service;
 
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
 /**
  * @author yangmeng
  * @version 1.0
  * @created 2021/4/7 5:08 下午
  **/
-@Repository
+@Component
 public class DemoDao {
 
     public String query() {

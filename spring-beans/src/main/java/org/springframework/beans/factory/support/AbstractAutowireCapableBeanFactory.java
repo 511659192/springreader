@@ -5,12 +5,10 @@ package org.springframework.beans.factory.support;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.Aware;
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -27,10 +25,8 @@ import org.springframework.core.ParameterNameDiscoverer;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -119,7 +115,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 
         Object exposedObject = bean;
-        polulateBean(beanName, mbd, instanceWrapper);
+        populateBean(beanName, mbd, instanceWrapper);
         exposedObject = initializingBean(beanName, exposedObject, mbd);
 
         if (earlySingletonExposure) {
@@ -181,7 +177,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
     }
 
-    private void polulateBean(String beanName, RootBeanDefinition mbd, BeanWrapper beanWrapper) {
+    private void populateBean(String beanName, RootBeanDefinition mbd, BeanWrapper beanWrapper) {
         List<InstantiationAwareBeanPostProcessor> instAwareBpps = getBeanPostProcessorCache().instantiationAware;
         if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
             for (InstantiationAwareBeanPostProcessor bp : instAwareBpps) {

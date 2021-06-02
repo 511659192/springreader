@@ -2,8 +2,10 @@
 // All rights reserved
 package org.springframework.beans.factory.annotation;
 
+import lombok.Getter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.PropertyValues;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 
 import javax.annotation.Nullable;
 import java.beans.PropertyDescriptor;
@@ -13,6 +15,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -55,8 +58,22 @@ public class InjectionMetadata {
         }
     };
 
+    public void checkConfigMembers(RootBeanDefinition beanDefinition) {
+        Set<InjectedElement> checkedElements = new LinkedHashSet<>(this.injectedElements.size());
+        for (InjectedElement element : this.injectedElements) {
+            Member member = element.getMember();
+            if (!beanDefinition.isExternallyManagedConfigMember(member)) {
+                beanDefinition.registerExternallyManagedConfigMember(member);
+                checkedElements.add(element);
+            }
+
+            this.checkedElements = checkedElements;
+        }
+    }
+
     public abstract static class InjectedElement {
 
+        @Getter
         protected final Member member;
 
         protected final boolean isField;

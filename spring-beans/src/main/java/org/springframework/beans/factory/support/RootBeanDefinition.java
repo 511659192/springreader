@@ -2,6 +2,7 @@
 // All rights reserved
 package org.springframework.beans.factory.support;
 
+import com.google.common.collect.Sets;
 import lombok.Getter;
 import org.springframework.beans.factory.config.AbstractBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -11,6 +12,8 @@ import org.springframework.core.ResolvableType;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
+import java.lang.reflect.Member;
+import java.util.Set;
 import java.util.StringJoiner;
 
 /**
@@ -19,6 +22,9 @@ import java.util.StringJoiner;
  * @created 2021/3/24 5:34 下午
  **/
 public class RootBeanDefinition extends AbstractBeanDefinition {
+
+    @Nullable
+    private Set<Member> externallyManagedConfigMembers = Sets.newHashSet();
 
     @Nullable
     private BeanDefinitionHolder decoratedDefinition;
@@ -98,5 +104,17 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
     @Override
     public String toString() {
         return new StringJoiner(", ", RootBeanDefinition.class.getSimpleName() + "[", "]").add("resolvedTargetType=" + resolvedTargetType).toString();
+    }
+
+    public boolean isExternallyManagedConfigMember(Member member) {
+        synchronized (this.postProcessingLock) {
+            return this.externallyManagedConfigMembers.contains(member);
+        }
+    }
+
+    public void registerExternallyManagedConfigMember(Member member) {
+        synchronized (this.postProcessingLock) {
+            this.externallyManagedConfigMembers.add(member);
+        }
     }
 }

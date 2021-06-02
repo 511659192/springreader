@@ -5,10 +5,7 @@ package springframework.context.support;
 import com.users.service.DemoService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.ui.Model;
 
 /**
  * @author yangmeng

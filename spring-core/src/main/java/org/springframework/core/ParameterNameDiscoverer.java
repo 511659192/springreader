@@ -2,9 +2,9 @@
 // All rights reserved
 package org.springframework.core;
 
-import jdk.internal.org.objectweb.asm.ClassReader;
-import jdk.internal.org.objectweb.asm.ClassVisitor;
-import jdk.internal.org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.MethodVisitor;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.SpringAsmInfo;
 
