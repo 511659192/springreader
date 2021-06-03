@@ -5,7 +5,6 @@ package org.springframework.beans.factory.annotation;
 import com.google.common.cache.Cache;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -22,7 +21,6 @@ import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.util.CacheUtils;
 import org.springframework.util.ClassUtils;
-import sun.reflect.misc.ReflectUtil;
 
 import javax.annotation.Nullable;
 import java.beans.PropertyDescriptor;

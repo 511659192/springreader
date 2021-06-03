@@ -480,7 +480,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
             Object beanInstance = descriptor.resolveCandidate(candidateName, requiredType, this);
             candidates.put(candidateName, (beanInstance instanceof NullBean ? null : beanInstance));
         } else {
-            candidates.put(candidateName, getType(candidateName));
+            Class<?> type = getType(candidateName);
+            candidates.put(candidateName, type);
         }
     }
 
