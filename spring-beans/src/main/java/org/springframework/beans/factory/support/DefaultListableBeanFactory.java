@@ -434,7 +434,19 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
             autowiredBeanNames.add(autowiredBeanName);
         }
 
-        return instanceCandidate;
+        if (instanceCandidate instanceof Class) {
+            instanceCandidate = descriptor.resolveCandidate(autowiredBeanName, type, this);
+        }
+
+        Object result = instanceCandidate;
+        if (result instanceof NullBean) {
+//            if (isRequired(descriptor)) {
+//                throw
+//            }
+            result = null;
+        }
+
+        return result;
 
     }
 
@@ -446,9 +458,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
             if (!autowiringType.isAssignableFrom(requiredType)) {
                 continue;
             }
-
         }
-
 
         for (String candidateName : candidateNames) {
             if (isSelfReference(beanName, candidateName)) {

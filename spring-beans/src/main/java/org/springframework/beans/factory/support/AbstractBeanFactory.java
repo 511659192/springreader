@@ -142,7 +142,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         return typeToMatch.isAssignableFrom(predictedType);
     }
 
-    private Class<?> predictBeanType(String beanName, RootBeanDefinition mbd, Class<?>[] typesToMatch) {
+    private Class<?> predictBeanType(String beanName, RootBeanDefinition mbd, Class<?>... typesToMatch) {
 
         Class<?> targetType = mbd.getTargetType();
         if (targetType != null) {
@@ -408,7 +408,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
             return beanInstance.getClass();
         }
 
-        return null;
+        BeanFactory parentBeanFactory = getParentBeanFactory();
+        if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
+            return parentBeanFactory.getType(beanName);
+        }
+
+        RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+        Class<?> predictedType = predictBeanType(beanName, mbd);
+        return predictedType;
     }
 
     @Override
