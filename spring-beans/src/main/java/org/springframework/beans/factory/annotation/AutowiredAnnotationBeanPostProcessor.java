@@ -5,9 +5,9 @@ package org.springframework.beans.factory.annotation;
 import com.google.common.cache.Cache;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.TypeConverter;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
@@ -35,7 +35,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -71,8 +70,10 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
     @Override
     public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
-
+        InjectionMetadata metadata = findAutowiringMetadata(beanName, beanType, null);
+        metadata.checkConfigMembers(beanDefinition);
     }
+
 
     @Override
     public int getOrder() {
@@ -152,13 +153,13 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
     @Override
     public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
-        InjectionMetadata metadata = findInjectionMetadata(beanName, bean.getClass(), pvs);
+        InjectionMetadata metadata = findAutowiringMetadata(beanName, bean.getClass(), pvs);
         metadata.inject(bean, beanName, pvs);
         return pvs;
     }
 
 
-    private InjectionMetadata findInjectionMetadata(String beanName, Class<?> beanClass, PropertyValues pvs) {
+    private InjectionMetadata findAutowiringMetadata(String beanName, Class<?> beanClass, PropertyValues pvs) {
         return get(injectionMetadataCache, beanName, () -> buildAutowiringMetadata(beanClass));
     }
 

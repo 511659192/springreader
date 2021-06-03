@@ -4,14 +4,14 @@ package com.users.service;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 /**
  * @author yangmeng
  * @version 1.0
  * @created 2021/4/7 5:08 下午
  **/
-@Service
+@Component
 @Data
 public class DemoService {
 

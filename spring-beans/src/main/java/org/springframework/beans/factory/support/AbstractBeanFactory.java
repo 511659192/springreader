@@ -156,7 +156,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         return resolveBeanClass(mbd, beanName, typesToMatch);
     }
 
-    private Class<?> resolveBeanClass(RootBeanDefinition mbd, String beanName, Class<?>... typesToMatch) {
+    protected Class<?> resolveBeanClass(RootBeanDefinition mbd, String beanName, Class<?>... typesToMatch) {
         if (mbd.hasBeanClass()) {
             return mbd.getBeanClass();
         }

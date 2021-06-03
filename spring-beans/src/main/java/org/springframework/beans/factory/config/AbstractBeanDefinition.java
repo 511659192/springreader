@@ -70,7 +70,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
     @Setter
     private Boolean lazyInit;
-    private boolean autowireCandidate;
+    private boolean autowireCandidate = true;
     private boolean primary = false;
 
     @Nullable

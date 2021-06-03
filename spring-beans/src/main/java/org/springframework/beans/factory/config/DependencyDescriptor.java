@@ -4,6 +4,7 @@ package org.springframework.beans.factory.config;
 
 import lombok.Getter;
 import org.springframework.beans.factory.InjectionPoint;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.TypeDescriptor;
 
@@ -56,5 +57,9 @@ public class DependencyDescriptor extends InjectionPoint {
 
     public Class<?> getDependencyType() {
         return this.field.getType();
+    }
+
+    public Object resolveCandidate(String candidateName, Class<?> requiredType, DefaultListableBeanFactory beanFactory) {
+        return beanFactory.getBean(candidateName);
     }
 }

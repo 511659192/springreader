@@ -442,14 +442,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
     private Map<String, Object> findAutowireCandidates(String beanName, Class<?> requiredType, DependencyDescriptor desc) {
         String[] candidateNames = beanNamesForTypeIncludingAncestors(this, requiredType, true, desc.isEager());
+        Map<String, Object> result = Maps.newLinkedHashMapWithExpectedSize(candidateNames.length);
         for (Map.Entry<Class<?>, Object> entry : this.resolvableDependencies.entrySet()) {
             Class<?> autowiringType = entry.getKey();
             if (!autowiringType.isAssignableFrom(requiredType)) {
                 continue;
             }
-
-            Object autowiringObject = entry.getValue();
-
 
         }
 
@@ -463,13 +461,19 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
                 continue;
             }
 
-
-
-
-
+            addCandidateEntry(result, candidateName, desc, requiredType);
         }
 
-        return null;
+        return result;
+    }
+
+    private void addCandidateEntry(Map<String, Object> candidates, String candidateName, DependencyDescriptor descriptor, Class<?> requiredType) {
+        if (containsSingleton(candidateName)) {
+            Object beanInstance = descriptor.resolveCandidate(candidateName, requiredType, this);
+            candidates.put(candidateName, (beanInstance instanceof NullBean ? null : beanInstance));
+        } else {
+            candidates.put(candidateName, getType(candidateName));
+        }
     }
 
     private boolean isSelfReference(@Nullable String beanName, @Nullable String candidateName) {
@@ -483,6 +487,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     protected boolean isAutowireCandidate(String beanName, DependencyDescriptor descriptor, AutowireCandidateResolver resolver) {
         beanName = transformedBeanName(beanName);
         if (containsBeanDefinition(beanName)) {
+            RootBeanDefinition beanDefinition = getMergedLocalBeanDefinition(beanName);
+            return isAutowireCandidate(beanName, beanDefinition, descriptor, resolver);
+        }
+
+        if (containsSingleton(beanName)) {
+
+            // todo
             return false;
         }
 
@@ -490,7 +501,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     }
 
     protected boolean isAutowireCandidate(String beanName, RootBeanDefinition mbd, DependencyDescriptor descriptor, AutowireCandidateResolver resolver) {
-        return true;
+        String name = transformedBeanName(beanName);
+        resolveBeanClass(mbd, name);
+        BeanDefinitionHolder holder = this.mergedBeanDefinitionHolders.computeIfAbsent(beanName, key -> new BeanDefinitionHolder(mbd, beanName));
+        return resolver.isAutowireCandidate(holder, descriptor);
     }
 
     public AutowireCandidateResolver getAutowireCandidateResolver() {

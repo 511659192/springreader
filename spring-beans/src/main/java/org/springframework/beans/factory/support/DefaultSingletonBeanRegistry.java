@@ -86,10 +86,24 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 
     public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
         return CacheUtils.get(singletonObjectsCache, beanName, () -> {
+            beforeSingletonCreation(beanName);
             Object singletonObject = singletonFactory.getObject();
+            afterSingletonCreation(beanName);
             addSingleton(beanName, singletonObject);
             return singletonObject;
         });
+    }
+
+    private void beforeSingletonCreation(String beanName) {
+        if (!this.singletonsCurrentlyInCreation.add(beanName)) {
+            throw new IllegalStateException(beanName);
+        }
+    }
+
+    protected void afterSingletonCreation(String beanName) {
+        if (!this.singletonsCurrentlyInCreation.remove(beanName)) {
+            throw new IllegalStateException("Singleton '" + beanName + "' isn't currently in creation");
+        }
     }
 
     private void addSingleton(String beanName, Object singletonObject) {
