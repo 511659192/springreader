@@ -14,7 +14,7 @@ public class StandardEnvironment extends AbstractEnvironment {
 
     @Override
     void customizePropertySources(MutablePropertySources mutablePropertySources) {
-        log.info("加载自定义属性源");
+//        log.info("加载自定义属性源");
         PropertiesPropertySource systemProperties = new PropertiesPropertySource("systemProperties", System.getProperties());
         mutablePropertySources.addLast(systemProperties);
 

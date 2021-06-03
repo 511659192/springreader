@@ -78,16 +78,14 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
     }
 
     Set<BeanDefinition> findCandidateComponents(String basePackage) {
-        log.info("package:{}", basePackage);
+//        log.info("package:{}", basePackage);
         return scanCandidateComponents(basePackage);
     }
 
     Set<BeanDefinition> scanCandidateComponents(String basePackage) {
-        log.info("package:{}", basePackage);
+//        log.info("package:{}", basePackage);
         String path = "classpath*:" + basePackage.replaceAll("\\.", "/") + "/**/*.class";
         Resource[] resources = this.resourcePatternResolver.getResources(path);
-        log.info("resources:{}", JsonUtils.toJson(resources));
-
 
         Set<BeanDefinition> candidates = Sets.newHashSet();
         for (Resource resource : resources) {

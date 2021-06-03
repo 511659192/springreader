@@ -32,7 +32,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
     public DefaultNamespaceHandlerResolver(ClassLoader classLoader, String handlerMappingsLocation) {
         this.handlerMappingsLocation = handlerMappingsLocation;
         this.classLoader = classLoader;
-        log.info("handlerMappingsLocation:{}", handlerMappingsLocation);
+//        log.info("handlerMappingsLocation:{}", handlerMappingsLocation);
     }
 
     @Override

@@ -26,8 +26,6 @@ import java.util.Set;
 public abstract class AnnotationConfigUtils {
 
     public static Set<BeanDefinitionHolder> registerAnnotationConfigProcessors(BeanDefinitionRegistry registry, @Nullable Object source) {
-        log.info("source:{}", source);
-
         DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) registry;
         beanFactory.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
         beanFactory.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver());
@@ -60,7 +58,7 @@ public abstract class AnnotationConfigUtils {
         definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
         registry.registerBeanDefinition(beanName, definition);
         BeanDefinitionHolder beanDefinitionHolder = new BeanDefinitionHolder(definition, beanName);
-        log.info("processName:{} role:{}", beanName, definition.getRole());
+//        log.info("processName:{} role:{}", beanName, definition.getRole());
         return beanDefinitionHolder;
     }
 

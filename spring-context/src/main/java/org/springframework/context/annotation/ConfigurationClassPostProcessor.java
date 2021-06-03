@@ -39,8 +39,6 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) {
-        log.info("");
-
     }
 
     @Override

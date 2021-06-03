@@ -26,8 +26,6 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 
     @Override
     public BeanDefinition parse(Element element, ParserContext parserContext) {
-        log.info("tagName:{}", element.getTagName());
-
         String basePackagesAttr = element.getAttribute("base-package");
         String[] basePackages = StringUtils.split(basePackagesAttr, ",");
         ClassPathBeanDefinitionScanner scanner = configScanner(element, parserContext);
@@ -37,7 +35,6 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
     }
 
     private void registerComponents(XmlReaderContext readerContext, Set<BeanDefinitionHolder> beanDefinitions, Element element) {
-        log.info("beanDefinitions:{}", beanDefinitions.size());
         Object source = readerContext.extractSource(element);
         CompositeComponentDefinition compositeDef = new CompositeComponentDefinition(element.getTagName(), source);
         for (BeanDefinitionHolder beanDefinition : beanDefinitions) {

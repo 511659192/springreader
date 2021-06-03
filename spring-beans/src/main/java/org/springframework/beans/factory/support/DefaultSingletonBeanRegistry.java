@@ -64,20 +64,15 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
             return null;
         }
 
-        return CacheUtils.get(singletonObjectsCache, beanName, () -> {
-            Object obj = this.earlySingletonObjects.get(beanName);
-            if (obj != null) {
-                return obj;
-            }
+        ObjectFactory<?> factory = this.singletonFactories.get(beanName);
+        if (factory == null) {
+            return null;
+        }
 
-            ObjectFactory factory = this.singletonFactories.get(beanName);
-            if (factory != null) {
-                obj = factory.getObject();
-                this.earlySingletonObjects.put(beanName, obj);
-                this.singletonFactories.remove(beanName);
-            }
-            return obj;
-        });
+        singletonObject = factory.getObject();
+        this.earlySingletonObjects.put(beanName, singletonObject);
+        this.singletonFactories.remove(beanName);
+        return singletonObject;
     }
 
     public boolean isSingletonCurrentlyInCreation(String beanName) {

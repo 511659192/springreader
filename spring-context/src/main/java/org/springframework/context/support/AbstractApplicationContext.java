@@ -70,7 +70,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     private Set<ApplicationEvent> earlyApplicationEvents;
 
     public AbstractApplicationContext() {
-        log.info("");
         this.resourcePatternResolver = new PathMatchingResourcePatternResolver(((ResourceLoader) this));
     }
 
@@ -93,14 +92,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         postProcessBeanFactory(beanFactory); // no use
         invokeBeanFactoryPostProcessors(beanFactory);
         registerBeanPostProcessors(beanFactory);
-
         initApplicationEventMulticaster();
         onRefresh(); // do nothing
-
         registerListeners();
-
         finishBeanFactoryInitialization(beanFactory);
-
         finishRefresh();
     }
 
@@ -182,7 +177,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     }
 
     private void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-        log.info("");
+//        log.info("");
         ClassLoader classLoader = getClassLoader();
         beanFactory.setBeanClassLoader(classLoader);
 
@@ -237,7 +232,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
 
     @Override
     public Resource[] getResources(String locationPattern) {
-        log.info("locationPattern:{}", locationPattern);
+//        log.info("locationPattern:{}", locationPattern);
         return this.resourcePatternResolver.getResources(locationPattern);
     }
 

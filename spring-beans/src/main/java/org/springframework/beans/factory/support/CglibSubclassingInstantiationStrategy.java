@@ -15,7 +15,6 @@ import java.lang.reflect.InvocationTargetException;
 public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationStrategy {
 
     public CglibSubclassingInstantiationStrategy() {
-        log.info("");
     }
 
     @Override

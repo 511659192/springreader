@@ -19,7 +19,6 @@ public class EventListenerMethodProcessor implements SmartInitializingSingleton,
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-        log.info("");
     }
 
     @Override

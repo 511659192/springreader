@@ -65,7 +65,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
     public DefaultListableBeanFactory(BeanFactory parent) {
         super(parent);
-        log.info("");
     }
 
     @Override
@@ -334,7 +333,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
                 return false;
             }
 
-            return isTypeMatch(beanName, resolvableType, allowEagerInit);
+            boolean typeMatch = isTypeMatch(beanName, resolvableType, allowEagerInit);
+            return typeMatch;
         }).toArray(String[]::new);
     }
 
@@ -354,15 +354,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
                 throw new IllegalArgumentException("Value [" + autowiredValue + "] does not implement specified dependency type [" + dependencyType.getName() + "]");
             }
             this.resolvableDependencies.put(dependencyType, autowiredValue);
-
-            log.info(" type:{} value:{}", dependencyType.getName(), autowiredValue.getClass().getName());
         }
     }
 
     @Override
     public void registerSingleton(String beanName, Object singletonObject) {
         super.registerSingleton(beanName, singletonObject);
-        log.info(" singleton:{} class:{}", beanName, singletonObject.getClass().getName());
+//        log.info(" singleton:{} class:{}", beanName, singletonObject.getClass().getName());
     }
 
     @Nullable

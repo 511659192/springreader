@@ -22,6 +22,7 @@ import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.util.CacheUtils;
 import org.springframework.util.ClassUtils;
+import sun.reflect.misc.ReflectUtil;
 
 import javax.annotation.Nullable;
 import java.beans.PropertyDescriptor;
@@ -205,6 +206,15 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
         protected void inject(Object target, @Nullable String beanName, @Nullable PropertyValues pvs) {
             Field field = (Field) this.member;
             Object value = resolveFieldValue(field, target, beanName);
+
+            if (value != null) {
+                try {
+                    field.setAccessible(true);
+                    field.set(target, value);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
 
         @Nullable
@@ -212,12 +222,8 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
             DependencyDescriptor descriptor = new DependencyDescriptor(field, this.required);
             descriptor.setContainingClass(bean.getClass());
             TypeConverter typeConverter = beanFactory.getTypeConverter();
-
             Set<String> autowiredBeanNames = new LinkedHashSet<>(1);
-
             Object value = beanFactory.resolveDependency(descriptor, beanName, autowiredBeanNames, typeConverter);
-
-
             return value;
 
         }

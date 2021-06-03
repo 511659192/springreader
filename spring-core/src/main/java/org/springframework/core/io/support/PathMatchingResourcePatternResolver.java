@@ -39,7 +39,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
     private PathMatcher pathMatcher = new AntPathMatcher();
 
     public PathMatchingResourcePatternResolver(ResourceLoader resourceLoader) {
-        log.info("");
+//        log.info("");
         this.resourceLoader = resourceLoader;
     }
 
@@ -50,7 +50,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
     @Override
     public Resource[] getResources(String locationPattern) {
-        log.info("locationPattern:{}", locationPattern);
+//        log.info("locationPattern:{}", locationPattern);
         if (locationPattern.startsWith("classpath*:")) {
             if (this.pathMatcher.isPattern(locationPattern.substring("classpath*:".length()))) {
                 return findPathMatchingResources(locationPattern);
@@ -117,7 +117,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
         File file = rootDirResource.getFile().getAbsoluteFile();
         HashSet<File> allFiles = Sets.<File>newHashSet();
         getAllFiles(file, allFiles);
-        log.info("all file size:{}", CollectionUtils.size(allFiles));
+//        log.info("all file size:{}", CollectionUtils.size(allFiles));
 
         Set<Resource> fileResources = Sets.newHashSet();
         for (File subFile : allFiles) {

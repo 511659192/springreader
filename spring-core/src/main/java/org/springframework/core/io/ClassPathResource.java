@@ -23,7 +23,6 @@ public class ClassPathResource implements Resource {
     private ClassLoader classLoader;
 
     public ClassPathResource(String path, ClassLoader classLoader) {
-        log.info("path:{}", path);
         this.path = path;
         this.classLoader = classLoader;
     }

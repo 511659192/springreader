@@ -23,7 +23,7 @@ public class CompositeComponentDefinition extends AbstractComponentDefinition {
     public CompositeComponentDefinition(String name, Object source) {
         this.name = name;
         this.source = source;
-        log.info("name:{] source:{}", name, source);
+//        log.info("name:{] source:{}", name, source);
     }
 
     public void addNestedComponent(ComponentDefinition componentDefinition) {

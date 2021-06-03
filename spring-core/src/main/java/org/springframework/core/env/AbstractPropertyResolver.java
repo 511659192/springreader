@@ -21,7 +21,6 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
     @Override
     public String resolveRequiredPlaceholders(String text) {
-        log.info("#resolveRequiredPlaceholders text:{}", text);
         return replacePlaceholders(text, this::getPropertyAsRawString);
     }
 

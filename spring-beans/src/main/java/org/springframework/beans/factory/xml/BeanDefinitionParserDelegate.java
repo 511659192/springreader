@@ -32,7 +32,6 @@ public class BeanDefinitionParserDelegate {
 
     public BeanDefinitionParserDelegate(XmlReaderContext readerContext) {
         this.readerContext = readerContext;
-        log.info("");
     }
 
     public boolean isDefaultNamespace(Node node) {
@@ -42,7 +41,7 @@ public class BeanDefinitionParserDelegate {
 
     public BeanDefinition parseCustomElement(Element element) {
         String namespaceURI = element.getNamespaceURI();
-        log.info("namespaceURI:{}", namespaceURI);
+//        log.info("namespaceURI:{}", namespaceURI);
         if (StringUtils.isBlank(namespaceURI)) {
             return null;
         }

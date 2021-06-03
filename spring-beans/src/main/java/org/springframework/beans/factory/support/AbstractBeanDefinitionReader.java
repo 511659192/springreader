@@ -38,7 +38,6 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
     private BeanNameGenerator beanNameGenerator = BeanNameGenerator.DEFAULT_BEAN_NAME_GENERATOR;
 
     public AbstractBeanDefinitionReader(BeanDefinitionRegistry registry) {
-        log.info("");
         this.registry = registry;
     }
 

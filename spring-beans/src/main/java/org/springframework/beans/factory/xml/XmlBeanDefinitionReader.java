@@ -35,7 +35,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
     public XmlBeanDefinitionReader(BeanDefinitionRegistry registry) {
         super(registry);
-        log.info("");
     }
 
     @Override
@@ -73,7 +72,6 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
     }
 
     private int registerBeanDefinitions(Document document, Resource resource) {
-        log.info("");
         int before = this.getRegistry().getBeanDefinitionCount();
         XmlReaderContext readerContext = createXmlReaderContext(resource);
         BeanDefinitionDocumentReader documentReader = new DefaultBeanDefinitionDocumentReader(readerContext);

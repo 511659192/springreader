@@ -2,9 +2,12 @@
 // All rights reserved
 package springframework.context.support;
 
+import com.users.service.DemoService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author yangmeng
@@ -15,11 +18,12 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class ClassPathXmlApplicationContextTest {
 
     @Test
-    public void testMain() {
+    public void testMain() throws InterruptedException {
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");
         int beanDefinitionCount = context.getBeanDefinitionCount();
         log.info("cnt: {}", beanDefinitionCount);
-//        DemoService bean = context.getBean(DemoService.class);
-//        log.info(bean.hello());
+        DemoService bean = context.getBean(DemoService.class);
+        log.info((bean.getDemoDao() == null) + "");
+        log.info(bean.hello());
     }
 }

@@ -63,7 +63,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
     private Map<String, RootBeanDefinition> mergedBeanDefinitions = new ConcurrentHashMap<>(256);
 
     public AbstractBeanFactory(BeanFactory parentBeanFactory) {
-        log.info("");
         this.parentBeanFactory = parentBeanFactory;
     }
 
@@ -357,20 +356,19 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         }
 
         this.customEditors.forEach((beanType, editorClass) -> registry.registerCustomEditor(beanType, BeanUtils.instantiateClass(editorClass)));
-        log.info("customEditor:{}", getBeanClassShortName(registry));
+//        log.info("customEditor:{}", getBeanClassShortName(registry));
     }
 
     @Override
     public void addPropertyEditorRegistrar(PropertyEditorRegistrar registrar) {
         this.propertyEditorRegistrars.add(registrar);
-        log.info(" register:{}", getBeanClassShortName(registrar));
+//        log.info(" register:{}", getBeanClassShortName(registrar));
     }
 
     @Override
     public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
         this.beanPostProcessors.remove(beanPostProcessor);
         this.beanPostProcessors.add(beanPostProcessor);
-        log.info(" refresh processor:{}", getBeanClassShortName(beanPostProcessor));
     }
 
     @Override

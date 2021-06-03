@@ -23,7 +23,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 
     public AbstractEnvironment() {
-        log.info("");
+//        log.info("");
         this.customizePropertySources(this.propertySources);
     }
 
@@ -33,7 +33,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
     @Override
     public String resolveRequiredPlaceholders(String text) {
-        log.info("text:{}", text);
+//        log.info("text:{}", text);
         return this.propertyResolver.resolveRequiredPlaceholders(text);
     }
 

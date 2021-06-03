@@ -77,24 +77,20 @@ public class ClassReaderDemo {
         @Override
         public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
             super.visit(version, access, name, signature, superName, interfaces);
-            log.info("visit name:{} signature:{} superName:{} interfaces:{}", name, signature, superName, interfaces);
         }
 
         @Override
         public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
-            log.info("visitField name:{} descriptor:{} signature:{} value:{]", name, descriptor, signature, value);
             return new FieldParser();
         }
 
         @Override
         public void visitInnerClass(String name, String outerName, String innerName, int access) {
-            log.info("visitInnerClass name:{} outerName:{} innerName:{}", name, outerName, innerName);
             super.visitInnerClass(name, outerName, innerName, access);
         }
 
         @Override
         public void visitOuterClass(String owner, String name, String descriptor) {
-            log.info("visitOuterClass owner:{} name:{} descriptor:{}", owner, name, descriptor);
             super.visitOuterClass(owner, name, descriptor);
         }
     }
@@ -108,7 +104,6 @@ public class ClassReaderDemo {
 
         @Override
         public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-            System.out.println("注释: " + descriptor + " 可见性: " + visible);
             return new AnnotationParser();
         }
     }

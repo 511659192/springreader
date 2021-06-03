@@ -29,7 +29,6 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
     public DefaultBeanDefinitionDocumentReader(XmlReaderContext readerContext) {
         this.readerContext = readerContext;
         this.registry = readerContext.getRegistry();
-        log.info("");
     }
 
     @Override
@@ -67,7 +66,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
     }
 
     private void parseBeanDefinitions(Element root, BeanDefinitionParserDelegate delegate) {
-        log.info("root uri:{}", root.getNamespaceURI());
+//        log.info("root uri:{}", root.getNamespaceURI());
         if (delegate.isDefaultNamespace(root)) {
             NodeList childNodes = root.getChildNodes();
             for (int i = 0; i < childNodes.getLength(); i++) {

@@ -59,7 +59,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         ignoreDependencyInterface(BeanClassLoaderAware.class);
 
         this.instantiationStrategy = new CglibSubclassingInstantiationStrategy();
-        log.info("");
+//        log.info("");
     }
 
 
@@ -81,7 +81,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             return bean;
         }
 
-        return doCreateBean(beanName, mbd, args);
+        Object o = doCreateBean(beanName, mbd, args);
+        return o;
     }
 
     private Object doCreateBean(String beanName, RootBeanDefinition mbd, Object... args) {
@@ -122,7 +123,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             Object earlySingletonReference = getSingleton(beanName, false);
             if (earlySingletonReference != null) {
                 if (exposedObject == bean) {
-                    exposedObject = earlySingletonExposure;
+                    exposedObject = earlySingletonReference;
                 } else if (!this.allowRawInjectionDespiteWrapping && hasDependentBean(beanName)){
 
                 }
@@ -154,7 +155,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
         Object result = existingBean;
         for (BeanPostProcessor beanPostProcessor : this.getBeanPostProcessors()) {
-            log.info("processorName: {} beanName: {}", getBeanClassShortName(beanPostProcessor), getBeanClassShortName(existingBean));
+//            log.info("processorName: {} beanName: {}", getBeanClassShortName(beanPostProcessor), getBeanClassShortName(existingBean));
             Object current = beanPostProcessor.postProcessBeforeInitialization(result, beanName);
             if (current == null) {
                 return result;
@@ -223,7 +224,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     private void applyMergedBeanDefinitionPostProcessors(RootBeanDefinition mbd, Class<?> beanClass, String beanName) {
         List<MergedBeanDefinitionPostProcessor> mergedDefinition = this.getBeanPostProcessorCache().mergedDefinition;
         for (MergedBeanDefinitionPostProcessor processor : mergedDefinition) {
-            log.info("processorName: {} beanName: {}", getBeanClassShortName(processor), getBeanClassShortName(beanClass));
+//            log.info("processorName: {} beanName: {}", getBeanClassShortName(processor), getBeanClassShortName(beanClass));
             processor.postProcessMergedBeanDefinition(mbd, beanClass, beanName);
         }
     }
@@ -330,7 +331,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         Object using = bean;
         List<BeanPostProcessor> beanPostProcessors = this.getBeanPostProcessors();
         for (BeanPostProcessor beanPostProcessor : beanPostProcessors) {
-            log.info("processorName: {} beanName: {}", getBeanClassShortName(beanPostProcessor), getBeanClassShortName(bean));
+//            log.info("processorName: {} beanName: {}", getBeanClassShortName(beanPostProcessor), getBeanClassShortName(bean));
             Object current = beanPostProcessor.postProcessAfterInitialization(bean, beanName);
             if (current == null) {
                 return using;
@@ -344,7 +345,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
     private Object applyBeanPostProcessorsBeforeInstantiation(Class<?> beanClass, String beanName) {
         for (InstantiationAwareBeanPostProcessor beanPostProcessor : getBeanPostProcessorCache().instantiationAware) {
-            log.info("processorName: {} beanName: {}", getBeanClassShortName(beanPostProcessor), getBeanClassShortName(beanClass));
+//            log.info("processorName: {} beanName: {}", getBeanClassShortName(beanPostProcessor), getBeanClassShortName(beanClass));
             Object bean = beanPostProcessor.postProcessBeforeInstantiation(beanClass, beanName);
             if (bean != null) {
                 return bean;

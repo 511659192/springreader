@@ -18,6 +18,15 @@ public class DemoService {
     @Autowired
     private DemoDao demoDao;
 
+
+    public DemoDao getDemoDao() {
+        return demoDao;
+    }
+
+    public void setDemoDao(DemoDao demoDao) {
+        this.demoDao = demoDao;
+    }
+
     public String hello() {
         return demoDao.query();
     }

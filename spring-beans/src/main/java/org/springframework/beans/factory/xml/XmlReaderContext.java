@@ -47,7 +47,6 @@ public class XmlReaderContext implements EnvironmentCapable, ResourceLoaderCapab
         this.sourceExtractor = sourceExtractor;
         this.beanDefinitionReader = beanDefinitionReader;
         this.namespaceHandlerResolver = namespaceHandlerResolver;
-        log.info("");
     }
 
     @Override

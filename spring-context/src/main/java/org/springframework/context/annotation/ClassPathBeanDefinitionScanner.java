@@ -48,14 +48,12 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
         if (useDefaultFilters) {
             registerDefaultFilters();
         }
-
-
-        log.info("");
+//        log.info("");
     }
 
 
     public Set<BeanDefinitionHolder> doScan(String... basePackages) {
-        log.info("packages:{}", JsonUtils.toJson(basePackages));
+//        log.info("packages:{}", JsonUtils.toJson(basePackages));
         if (basePackages.length == 0) {
             return Collections.emptySet();
         }

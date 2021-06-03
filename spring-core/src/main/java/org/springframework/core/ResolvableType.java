@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.StringJoiner;
 
 /**
  * @author yangmeng
@@ -71,5 +72,10 @@ public class ResolvableType {
 
     public Class<?> resolve(Class<?> fallback) {
         return (this.resolved != null ? this.resolved : fallback);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ResolvableType.class.getSimpleName() + "[", "]").add("type=" + type).add("resolved=" + resolved).toString();
     }
 }

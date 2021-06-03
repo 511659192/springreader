@@ -21,7 +21,7 @@ public class DefaultResourceLoader implements ResourceLoader {
     @Override
     public Resource getResource(String location) {
 
-        log.info("location:{}", location);
+//        log.info("location:{}", location);
 
         if (location.startsWith("/")) {
             return getResourceByPath(location);
