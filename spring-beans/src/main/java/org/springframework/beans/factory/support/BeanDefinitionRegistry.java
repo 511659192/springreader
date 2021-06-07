@@ -20,4 +20,6 @@ public interface BeanDefinitionRegistry {
     boolean containsBeanDefinition(String className);
 
     void registerAlias(String name, String alias);
+
+    BeanDefinition getBeanDefinition(String beanName);
 }

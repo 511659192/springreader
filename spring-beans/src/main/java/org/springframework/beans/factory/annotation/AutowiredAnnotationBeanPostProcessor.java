@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.TypeConverter;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
@@ -50,7 +51,6 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
     private int order = Ordered.LOWEST_PRECEDENCE - 2;
 
     @Nullable
-    @Setter
     private ConfigurableListableBeanFactory beanFactory;
 
     private final Set<Class<? extends Annotation>> autowiredAnnotationTypes = new LinkedHashSet<>(4);
@@ -65,6 +65,11 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
     public AutowiredAnnotationBeanPostProcessor() {
         this.autowiredAnnotationTypes.add(Autowired.class);
         this.autowiredAnnotationTypes.add(Value.class);
+    }
+
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) {
+        this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
     }
 
     @Override

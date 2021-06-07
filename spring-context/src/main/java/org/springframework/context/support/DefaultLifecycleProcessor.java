@@ -2,7 +2,6 @@
 // All rights reserved
 package org.springframework.context.support;
 
-import lombok.Setter;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -18,8 +17,12 @@ import javax.annotation.Nullable;
 public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactoryAware {
 
     @Nullable
-    @Setter
     private volatile ConfigurableListableBeanFactory beanFactory;
+
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) {
+        this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
+    }
 
     @Override
     public void onRefresh() {

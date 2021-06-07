@@ -7,5 +7,6 @@ package org.springframework.beans.factory;
  * @version 1.0
  * @created 2021/4/15 4:32 下午
  **/
-public interface BeanClassLoaderAware extends Aware{
+public interface BeanClassLoaderAware extends Aware {
+
 }
