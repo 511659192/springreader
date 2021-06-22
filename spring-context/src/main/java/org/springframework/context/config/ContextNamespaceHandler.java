@@ -17,6 +17,6 @@ public class ContextNamespaceHandler extends NamespaceHandlerSupport {
 
     @Override
     public void init() {
-        registerBeanDefinitionParser("component-scan", new ComponentScanBeanDefinitionParser());
+        registerBeanDefinitionParser("aspectj-autoproxy", new ComponentScanBeanDefinitionParser());
     }
 }
