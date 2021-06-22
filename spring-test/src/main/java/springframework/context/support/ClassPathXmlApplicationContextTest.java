@@ -19,11 +19,13 @@ public class ClassPathXmlApplicationContextTest {
 
     @Test
     public void testMain() throws InterruptedException {
-        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");
-        int beanDefinitionCount = context.getBeanDefinitionCount();
-        log.info("cnt: {}", beanDefinitionCount);
-        DemoService bean = context.getBean(DemoService.class);
-        log.info((bean.getDemoDao() == null) + "");
-        log.info(bean.hello());
+        System.out.println(5 << 20);
+
+//        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");
+//        int beanDefinitionCount = context.getBeanDefinitionCount();
+//        log.info("cnt: {}", beanDefinitionCount);
+//        DemoService bean = context.getBean(DemoService.class);
+//        log.info((bean.getDemoDao() == null) + "");
+//        log.info(bean.hello());
     }
 }

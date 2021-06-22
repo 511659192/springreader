@@ -1,6 +1,6 @@
 // Copyright (C) 2021 Meituan
 // All rights reserved
-package com.example.springsources;
+package com.example.springresources;
 
 import org.springframework.stereotype.Component;
 
@@ -13,7 +13,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class DemoService {
 
-    public void sayHello() {
+    public String sayHello() {
         System.out.println("hello world");
+
+        return "aaaa";
+    }
+
+
+    public String mockMethod(String bb) {
+        return "mockMethod:" + bb;
     }
 }

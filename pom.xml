@@ -15,6 +15,7 @@
         <module>spring-core</module>
         <module>spring-test</module>
         <module>spring-aop</module>
+        <module>java-basic</module>
     </modules>
 
     <properties>

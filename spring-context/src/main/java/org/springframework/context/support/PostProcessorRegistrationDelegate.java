@@ -17,11 +17,13 @@ import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * @author yangmeng
@@ -125,6 +127,7 @@ public class PostProcessorRegistrationDelegate {
         List<BeanDefinitionRegistryPostProcessor> newProcessors = Lists.newArrayList();
 
         String[] beanDefinitionRegistryPostProcessorNames = beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
+
         for (String postProcessorName : beanDefinitionRegistryPostProcessorNames) {
             if (processedBeans.contains(postProcessorName)) {
                 continue;

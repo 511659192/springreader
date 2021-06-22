@@ -1,6 +1,6 @@
 // Copyright (C) 2021 Meituan
 // All rights reserved
-package com.example.springsources;
+package com.example.springresources;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
